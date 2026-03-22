@@ -1,0 +1,342 @@
+:root {
+  --font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --bg-dark: #050505;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --accent: #5e6ad2;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* let GSAP control scrolling */
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Container */
+.app-container {
+  width: 100%;
+  position: relative;
+}
+
+/* ─── Hero Component ─── */
+.hero-sequence-container {
+  width: 100%;
+  height: 100svh; /* use svh for mobile browser chrome */
+  position: relative;
+  background: var(--bg-dark);
+}
+
+.canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 5, 0.2) 0%,
+    rgba(5, 5, 5, 0.0) 50%,
+    rgba(5, 5, 5, 0.8) 100%
+  );
+  pointer-events: none;
+}
+
+/* ─── Navbar ─── */
+.navbar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 4rem;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-button {
+  pointer-events: auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: transparent;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  min-height: 35px;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 15px rgba(255,255,255,0.1);
+}
+
+/* ─── Hero Text Overlay ─── */
+.text-overlay {
+  position: absolute;
+  top: 50%;
+  left: clamp(1.5rem, 5vw, 5rem);
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+  max-width: 90vw;
+}
+
+.hero-title {
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: clamp(0.95rem, 2.5vw, 1.5rem);
+  color: var(--text-secondary);
+  max-width: min(500px, 85vw);
+  line-height: 1.5;
+}
+
+/* ─── Extra Content ─── */
+.extra-content {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-dark);
+  position: relative;
+  z-index: 10;
+}
+
+.extra-content h2 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  margin-bottom: 1rem;
+}
+
+/* ─── Mobile Breakpoint ─── */
+@media (max-width: 768px) {
+  .navbar-overlay {
+    padding: 1rem 1.5rem;
+  }
+
+  .text-overlay {
+    left: 1.5rem;
+    right: 1.5rem;
+    top: 45%;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: clamp(1.8rem, 9vw, 2.5rem);
+  }
+}
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Container */
+.app-container {
+  width: 100%;
+  position: relative;
+}
+
+/* Hero Component Styles */
+.hero-sequence-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background: var(--bg-dark);
+}
+
+.canvas-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 5, 0.2) 0%,
+    rgba(5, 5, 5, 0.0) 50%,
+    rgba(5, 5, 5, 0.8) 100%
+  );
+  pointer-events: none;
+}
+
+/* Navbar Overlay Styles */
+.navbar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 4rem;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none; /* Let clicks pass through if empty, but we add pointer-events: auto to buttons */
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-button {
+  pointer-events: auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: transparent; /* Text is transparent to let the image show through, but interactive! */
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  min-height: 35px;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 15px rgba(255,255,255,0.1);
+}
+
+/* Text Overlay Styles */
+.text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 5rem;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hero-title {
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+/* Additional Content */
+.extra-content {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-dark);
+  position: relative;
+  z-index: 10;
+}
+
+.extra-content h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* ─── Achievements Section Styles ─── */
+#section-achievements {
+  position: relative;
+  width: 100vw;
+  height: 350vh;
+  background-color: var(--bg-dark);
+}
+
+.achievements-label {
+  position: absolute;
+  top: 2rem;
+  left: 4vw;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-weight: 600;
+}
