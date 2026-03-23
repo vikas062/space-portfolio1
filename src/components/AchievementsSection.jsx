@@ -829,8 +829,10 @@ export default function AchievementsSection() {
     return()=>ctx.revert();
   },[]);
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   return(
-    <section ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-achievements" style={{position:'relative',width:'100vw',height:'350vh',background:'#00000a'}}>
+    <section ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-achievements"
+      style={{position:'relative',width:'100vw',height: isMobile ? '100vh' : '350vh',background:'#00000a'}}>
 
       <div style={{position:'sticky',top:0,width:'100vw',height:'100vh',overflow:'hidden'}}>
 

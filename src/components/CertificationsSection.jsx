@@ -404,7 +404,7 @@ export default function CertificationsSection() {
   return (
     <>
       <div ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-certifications"
-        style={{position:'relative',width:'100vw',height:'350vh',backgroundColor:'#00000a'}}>
+        style={{position:'relative',width:'100vw',height: window.innerWidth < 768 ? '100vh' : '350vh',backgroundColor:'#00000a'}}>
 
         <div style={{position:'sticky',top:0,width:'100vw',height:'100vh',overflow:'hidden'}}>
 

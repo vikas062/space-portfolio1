@@ -90,12 +90,12 @@ export default function OverlayNav() {
         gap: '0.25rem',
         height: '56px',
         padding: isMobile ? '0 1.2rem' : '0',
-        background: (scrolled || menuOpen) ? 'rgba(0,0,0,0.88)' : 'transparent',
-        backdropFilter: (scrolled || menuOpen) ? 'blur(14px)' : 'none',
-        WebkitBackdropFilter: (scrolled || menuOpen) ? 'blur(14px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        opacity: (scrolled || menuOpen) ? 1 : (isMobile ? 0 : 0),
-        pointerEvents: (scrolled || menuOpen) ? 'auto' : 'none',
+        background: (scrolled || menuOpen) ? 'rgba(0,0,0,0.88)' : (isMobile ? 'rgba(0,0,0,0.72)' : 'transparent'),
+        backdropFilter: (scrolled || menuOpen || isMobile) ? 'blur(14px)' : 'none',
+        WebkitBackdropFilter: (scrolled || menuOpen || isMobile) ? 'blur(14px)' : 'none',
+        borderBottom: (scrolled || isMobile) ? '1px solid rgba(255,255,255,0.06)' : 'none',
+        opacity: isMobile ? 1 : (scrolled || menuOpen) ? 1 : 0,
+        pointerEvents: isMobile ? 'auto' : (scrolled || menuOpen) ? 'auto' : 'none',
         transition: 'opacity 0.4s ease, background 0.4s ease',
       }}>
 
