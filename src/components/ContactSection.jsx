@@ -25,22 +25,22 @@ function Handle({ c }) {
       href={c.href} target="_blank" rel="noopener noreferrer"
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
-        display:'flex', flexDirection:'column', gap:'0.18rem',
+        display:'flex', flexDirection:'column', gap:'0.25rem',
         textDecoration:'none', flex:1, minWidth:0,
-        padding:'0.9rem 1.2rem',
+        padding:'1.2rem 1.5rem',
         background: hov ? 'rgba(255,255,255,0.06)' : 'transparent',
         transition:'background .18s',
       }}
     >
       <span style={{
         fontFamily:"'JetBrains Mono',monospace",
-        fontSize:'0.44rem', letterSpacing:'.3em', textTransform:'uppercase',
+        fontSize:'0.65rem', letterSpacing:'.2em', textTransform:'uppercase',
         color: hov ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
         transition:'color .18s', whiteSpace:'nowrap',
       }}>{c.label} ↗</span>
       <span style={{
         fontFamily:"'Space Grotesk',sans-serif",
-        fontSize:'0.72rem', fontWeight:400,
+        fontSize:'1.1rem', fontWeight:400,
         color: hov ? '#fff' : 'rgba(255,255,255,0.62)',
         transition:'color .18s',
         overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
@@ -145,11 +145,11 @@ export default function ContactSection() {
           <div style={{ width:1, background:'rgba(255,255,255,0.06)', margin:'0.6rem 0', flexShrink:0 }}/>
           <div style={{
             display:'flex', alignItems:'center',
-            padding:'0.9rem 1.4rem', flexShrink:0,
+            padding:'1.2rem 1.6rem', flexShrink:0,
           }}>
             <span style={{
               fontFamily:"'JetBrains Mono',monospace",
-              fontSize:'0.4rem', letterSpacing:'.25em', textTransform:'uppercase',
+              fontSize:'0.6rem', letterSpacing:'.25em', textTransform:'uppercase',
               color:'rgba(255,255,255,0.18)',
             }}>© {new Date().getFullYear()}</span>
           </div>
