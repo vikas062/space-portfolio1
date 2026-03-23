@@ -54,14 +54,12 @@ canvas {
   transform: translateZ(0);
 }
 
-/* Off-screen sections: GPU compositing only, no content-visibility
-   (content-visibility:auto breaks sticky scroll on mobile) */
-#section-skills,
-#section-projects,
+/* Section perf: style containment only — layout containment breaks
+   sticky+scroll calculations (getBoundingClientRect) in ProjectsSection */
 #section-achievements,
 #section-certifications,
 #section-contact {
-  contain: layout style;  /* prevent layout thrash, safe for sticky */
+  contain: style;
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────── */

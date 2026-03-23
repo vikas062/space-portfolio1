@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
@@ -85,7 +85,7 @@ function BgScene({ project }) {
       <NebulaPlane pos={[35,-6,-70]}  size={60} col={project.nebulaB} t={4} />
       <NebulaPlane pos={[0,22,-60]}   size={42} col={project.nebulaA} t={8} />
       <EffectComposer>
-        <Bloom intensity={3} luminanceThreshold={0.12} luminanceSmoothing={0.7} radius={0.9} blendFunction={BlendFunction.ADD}/>
+        <Bloom intensity={0.7} luminanceThreshold={0.18} luminanceSmoothing={0.75} radius={0.8} blendFunction={BlendFunction.ADD}/>
       </EffectComposer>
     </>
   );
@@ -103,11 +103,17 @@ function Card({ project, cardRef }) {
     );
   }, [project.id]);
 
+  const isMobile = window.innerWidth < 768;
   return (
     <div ref={cardRef} style={{
-      width:'100vw', height:'100vh', flexShrink:0,
-      display:'grid', gridTemplateColumns:'1fr 1fr',
-      alignItems:'center', gap:'5vw', padding:'0 7vw',
+      width: isMobile ? '100vw' : '100vw',
+      height: isMobile ? 'auto' : '100vh',
+      flexShrink: 0,
+      display: isMobile ? 'flex' : 'grid',
+      flexDirection: isMobile ? 'column' : undefined,
+      gridTemplateColumns: isMobile ? undefined : '1fr 1fr',
+      alignItems:'center', gap: isMobile ? '2rem' : '5vw',
+      padding: isMobile ? '5rem 6vw 4rem' : '0 7vw',
     }}>
 
       {/* Left: Text */}
@@ -232,6 +238,7 @@ export default function ProjectsSection() {
   const activeRef   = useRef(0);
   const { ref:viewRef, inView } = useInView({ rootMargin:'0px' });
   const [active, setActive] = React.useState(PROJECTS[0]);
+  const isMobile = window.innerWidth < 768;
 
   const refs = [useRef(null), useRef(null)];
 
@@ -250,6 +257,24 @@ export default function ProjectsSection() {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Mobile: render as simple vertical stack — no horizontal sticky scroll
+  if (isMobile) {
+    return (
+      <div ref={(el)=>{ outerRef.current=el; viewRef.current=el; }}
+        id="section-projects"
+        style={{ position:'relative', width:'100vw', background:'#040410' }}>
+        <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false }} dpr={[1,1]}
+          frameloop={inView?'always':'never'}
+          style={{ position:'fixed', inset:0, zIndex:0 }}>
+          <BgScene project={PROJECTS[0]} />
+        </Canvas>
+        <div style={{ position:'relative', zIndex:10 }}>
+          {PROJECTS.map((p,i) => <Card key={p.id} project={p} cardRef={refs[i]} />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={(el)=>{ outerRef.current=el; viewRef.current=el; }}
