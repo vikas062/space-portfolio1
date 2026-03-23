@@ -9,18 +9,7 @@ export default defineConfig({
     port: 0,
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor':  ['react', 'react-dom'],
-          'three-vendor':  ['three'],
-          'r3f-vendor':    ['@react-three/fiber', '@react-three/drei', '@react-three/postprocessing'],
-          'gsap-vendor':   ['gsap'],
-          'lenis-vendor':  ['lenis'],
-        },
-      },
-    },
-    // Slightly higher limit so Three.js chunk isn't warned about
+    // Raise warning limit for Three.js (it's intentionally large)
     chunkSizeWarningLimit: 1200,
   },
 })
