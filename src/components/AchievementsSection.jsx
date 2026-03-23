@@ -889,7 +889,7 @@ export default function AchievementsSection() {
           camera={{position:[0,5,55],fov:52}}
           gl={{antialias:false,toneMappingExposure:1.4,toneMapping:THREE.ACESFilmicToneMapping}}
           dpr={[1, 1]}
-          frameloop={inView ? 'always' : 'never'}
+          frameloop="always"
           style={{position:'absolute',inset:0}}
         >
           <color attach="background" args={['#00000a']} />

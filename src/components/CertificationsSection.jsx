@@ -468,7 +468,7 @@ export default function CertificationsSection() {
             camera={{position:[0,7,18],fov:52}} 
             gl={{antialias:false,toneMappingExposure:1.4}}
             dpr={[1, 1]}
-            frameloop={inView ? 'always' : 'never'}
+            frameloop="always"
             style={{position:'absolute',inset:0}}
           >
             <color attach="background" args={['#00000a']} />

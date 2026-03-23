@@ -1,9 +1,13 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Environment, MeshTransmissionMaterial, Html } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
 import * as THREE from 'three';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // ── Devicon class map ─────────────────────────────────────────────────────────
 const ICON_MAP = {
@@ -293,15 +297,30 @@ function Scene({ domain }) {
 
 // ── Main Export ───────────────────────────────────────────────────────────────
 export default function SkillsSection() {
-  const [activeDomain, setActiveDomain] = useState('tools'); // default: Tools visible on arrival
+  const secRef = useRef();
+  const [activeDomain, setActiveDomain] = useState('tools');
   const active = DOMAINS.find(d => d.id === activeDomain);
   const { ref: viewRef, inView } = useInView({ rootMargin: '200px 0px' });
-
   const isMobile = window.innerWidth <= 768;
+
+  // Pin the section for 2× viewport so user sees the 3D before scrolling away
+  useEffect(() => {
+    if (isMobile) return;
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: secRef.current,
+        start: 'top top',
+        end: `+=${window.innerHeight * 2}`,
+        pin: true,
+        pinSpacing: true,
+      });
+    });
+    return () => ctx.revert();
+  }, [isMobile]);
 
   return (
     <section
-      ref={viewRef}
+      ref={(el) => { secRef.current = el; viewRef.current = el; }}
       id="section-skills"
       onMouseLeave={() => setActiveDomain('tools')}
       style={{
