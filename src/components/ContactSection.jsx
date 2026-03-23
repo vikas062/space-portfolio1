@@ -89,10 +89,10 @@ export default function ContactSection() {
         }}
       />
 
-      {/* Strong bottom vignette so bottom panel reads */}
+      {/* Very light bottom fade — just enough so text at bottom edge reads */}
       <div style={{
         position:'absolute', inset:0, pointerEvents:'none',
-        background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 35%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.88) 88%, #000 100%)',
+        background:'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.38) 100%)',
       }}/>
 
       {/* Top edge fade */}
@@ -102,13 +102,10 @@ export default function ContactSection() {
         pointerEvents:'none', zIndex:2,
       }}/>
 
-      {/* ── Bottom panel — heading + all handles ── */}
+      {/* ── Bottom panel — text directly on photo ── */}
       <div ref={panelRef} style={{
         position:'absolute', bottom:0, left:0, right:0, zIndex:10,
-        borderTop:'1px solid rgba(255,255,255,0.09)',
-        backdropFilter:'blur(20px)',
-        WebkitBackdropFilter:'blur(20px)',
-        background:'rgba(0,0,0,0.38)',
+        borderTop:'1px solid rgba(255,255,255,0.1)',
       }}>
 
         {/* Heading row */}
