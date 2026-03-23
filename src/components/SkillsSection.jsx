@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Environment, MeshTransmissionMaterial, Html } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from '../hooks/useInView';
+import { useStableVisible } from '../hooks/useStableVisible';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -432,8 +433,8 @@ export default function SkillsSection() {
                 <Canvas 
                   camera={{ position: [0, 0, 8], fov: 50 }}
                   dpr={[1, 1]}
-                  frameloop={inView ? 'always' : 'never'}
-                  gl={{ antialias: false }}
+                  frameloop={inView ? 'always' : 'demand'}
+                  gl={{ antialias: false, powerPreference: 'high-performance' }}
                 >
                   <Scene domain={active} />
                 </Canvas>

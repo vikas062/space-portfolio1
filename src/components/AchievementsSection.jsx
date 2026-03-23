@@ -5,6 +5,7 @@ import { Html, OrbitControls } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import { useInView } from '../hooks/useInView';
+import { useStableVisible } from '../hooks/useStableVisible';
 import { Vector2 } from 'three';
 
 const CA_OFFSET = new Vector2(0.0004, 0.0004);
@@ -807,6 +808,7 @@ export default function AchievementsSection() {
   }, [isMobile]);
 
   const { ref: viewRef, inView } = useInView({ rootMargin: '300px 0px' });
+  const canvasVisible = useStableVisible(secRef, '300px 0px', 1500);
 
   // Forward wheel events from canvas wrapper to page so scrolling works on canvas
   useEffect(() => {
@@ -886,9 +888,9 @@ export default function AchievementsSection() {
         <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0}}>
         <Canvas
           camera={{position:[0,5,55],fov:52}}
-          gl={{antialias:false,toneMappingExposure:1.4,toneMapping:THREE.ACESFilmicToneMapping}}
+          gl={{antialias:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
           dpr={[1, 1]}
-          frameloop="always"
+          frameloop={canvasVisible ? 'always' : 'demand'}
           style={{position:'absolute',inset:0}}
         >
           <color attach="background" args={['#00000a']} />

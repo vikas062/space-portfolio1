@@ -84,6 +84,7 @@ function WhatsAppButton() {
 
 function App() {
   const lenisRef = useRef(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   useEffect(() => {
     function update(time) {
@@ -92,18 +93,26 @@ function App() {
       lenis.raf(time * 1000);
     }
     gsap.ticker.add(update);
-    gsap.ticker.lagSmoothing(500, 33); // restore lag protection
-    // Keep ScrollTrigger in sync with Lenis scroll position
-    const onScroll = () => ScrollTrigger.update();
-    lenisRef.current?.lenis?.on('scroll', onScroll);
+    gsap.ticker.lagSmoothing(0); // required for Lenis — prevents GSAP frame catch-up jitter
+    // Sync ScrollTrigger with Lenis scroll position
+    const syncST = () => ScrollTrigger.update();
+    lenisRef.current?.lenis?.on('scroll', syncST);
     return () => {
       gsap.ticker.remove(update);
-      lenisRef.current?.lenis?.off('scroll', onScroll);
+      lenisRef.current?.lenis?.off('scroll', syncST);
     };
   }, []);
 
   return (
-    <ReactLenis root ref={lenisRef} autoRaf={false} options={{ lerp: 0.1, duration: 1.0, smoothWheel: true, wheelMultiplier: 1.0, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) }}>
+    <ReactLenis root ref={lenisRef} autoRaf={false} options={{
+      lerp: isMobile ? 1 : 0.1,
+      duration: isMobile ? 0 : 1.0,
+      smoothWheel: !isMobile,
+      smoothTouch: false,       // never intercept touch — mobile scroll must be native
+      touchMultiplier: 0,       // no touch amplification
+      wheelMultiplier: 1.0,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    }}>
       <div className="app-container">
         <OverlayNav />
         <div style={{ position: 'relative' }}>

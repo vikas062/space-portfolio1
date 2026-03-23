@@ -20,29 +20,31 @@ const CONTACTS = [
 
 function Handle({ c }) {
   const [hov, setHov] = useState(false);
+  const mob = typeof window !== 'undefined' && window.innerWidth < 768;
   return (
     <a
       href={c.href} target="_blank" rel="noopener noreferrer"
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
-        display:'flex', flexDirection:'column', gap:'0.25rem',
+        display:'flex', flexDirection:'column', gap:'0.2rem',
         textDecoration:'none',
-        flex:'1 1 150px', minWidth:0,
-        padding:'1.2rem 1.5rem',
+        flex: mob ? 'unset' : '1 1 150px', minWidth:0,
+        padding: mob ? '0.9rem 1rem' : '1.2rem 1.5rem',
         background: hov ? 'rgba(255,255,255,0.06)' : 'transparent',
         borderRight:'1px solid rgba(255,255,255,0.06)',
+        borderBottom: mob ? '1px solid rgba(255,255,255,0.06)' : 'none',
         transition:'background .18s',
       }}
     >
       <span style={{
         fontFamily:"'JetBrains Mono',monospace",
-        fontSize:'0.65rem', letterSpacing:'.2em', textTransform:'uppercase',
+        fontSize: mob ? '0.5rem' : '0.65rem', letterSpacing:'.2em', textTransform:'uppercase',
         color: hov ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
         transition:'color .18s', whiteSpace:'nowrap',
       }}>{c.label} ↗</span>
       <span style={{
         fontFamily:"'Space Grotesk',sans-serif",
-        fontSize:'1.1rem', fontWeight:400,
+        fontSize: mob ? '0.8rem' : '1.1rem', fontWeight:400,
         color: hov ? '#fff' : 'rgba(255,255,255,0.62)',
         transition:'color .18s',
         overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
@@ -54,6 +56,7 @@ function Handle({ c }) {
 export default function ContactSection() {
   const secRef    = useRef();
   const panelRef  = useRef();
+  const isMobile  = typeof window !== 'undefined' && window.innerWidth < 768;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -72,7 +75,8 @@ export default function ContactSection() {
       ref={secRef}
       id="section-contact"
       style={{
-        position:'relative', width:'100vw', height:'100vh',
+      position:'relative', width:'100vw',
+        height: isMobile ? '100svh' : '100vh',
         overflow:'hidden', background:'#000',
       }}
     >
@@ -120,7 +124,7 @@ export default function ContactSection() {
         }}>
           <h2 style={{
             fontFamily:"'Space Grotesk',sans-serif",
-            fontSize:'clamp(2rem,5vw,4rem)',
+            fontSize: isMobile ? 'clamp(1.6rem,8vw,2.4rem)' : 'clamp(2rem,5vw,4rem)',
             fontWeight:700, letterSpacing:'-.05em',
             color:'#fff', lineHeight:1, margin:0,
           }}>
@@ -136,11 +140,17 @@ export default function ContactSection() {
           </p>
         </div>
 
-        {/* Handles row — wraps on small screens */}
+        {/* Handles row — 2-col grid on mobile, flex row on desktop */}
         <div style={{
-          display:'flex', alignItems:'stretch',
-          flexWrap:'wrap',
-          overflow:'hidden',
+          ...(isMobile ? {
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+          } : {
+            display: 'flex',
+            alignItems: 'stretch',
+            flexWrap: 'wrap',
+          }),
+          overflow: 'hidden',
         }}>
           {CONTACTS.map((c) => (
             <Handle key={c.id} c={c} />

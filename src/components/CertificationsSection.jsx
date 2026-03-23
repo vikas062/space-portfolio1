@@ -8,6 +8,7 @@ import * as THREE from 'three';
 
 const CA_OFFSET = new Vector2(0.0004, 0.0004);
 import { useInView } from '../hooks/useInView';
+import { useStableVisible } from '../hooks/useStableVisible';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -413,6 +414,7 @@ export default function CertificationsSection() {
   }, [isMobile]);
 
   const { ref: viewRef, inView } = useInView({ rootMargin: '300px 0px' });
+  const canvasVisible = useStableVisible(secRef, '300px 0px', 1500);
 
   return (
     <>
@@ -465,9 +467,9 @@ export default function CertificationsSection() {
           /*/}
           <Canvas 
             camera={{position:[0,7,18],fov:52}} 
-            gl={{antialias:false,toneMappingExposure:1.4}}
+            gl={{antialias:false, toneMappingExposure:1.4, powerPreference:'high-performance'}}
             dpr={[1, 1]}
-            frameloop="always"
+            frameloop={canvasVisible ? 'always' : 'demand'}
             style={{position:'absolute',inset:0}}
           >
             <color attach="background" args={['#00000a']} />

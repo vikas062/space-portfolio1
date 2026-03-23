@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useInView } from '../hooks/useInView';
+import { useStableVisible } from '../hooks/useStableVisible';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -241,6 +242,7 @@ export default function ProjectsSection() {
   const progressRef = useRef(0);
   const activeRef   = useRef(0);
   const { ref:viewRef, inView } = useInView({ rootMargin:'200px' });
+  const canvasVisible = useStableVisible(outerRef, '200px 0px', 1500);
   const [active, setActive] = React.useState(PROJECTS[0]);
   const isMobile = window.innerWidth < 768;
 
@@ -255,12 +257,12 @@ export default function ProjectsSection() {
       ScrollTrigger.create({
         trigger: inner,
         start: 'top top',
-        end: `+=${maxShift + window.innerHeight * 5}`,
+        end: `+=${maxShift + window.innerHeight * 2}`,
         pin: true,
         scrub: true,
         anticipatePin: 1,
         onUpdate: (self) => {
-          const tail = window.innerHeight * 5;
+          const tail = window.innerHeight * 2;
           const totalEnd = maxShift + tail;
           const rawPx = self.progress * totalEnd;
           // Clamp: horizontal scroll completes at last project, tail keeps pin
@@ -303,8 +305,8 @@ export default function ProjectsSection() {
       <div ref={innerRef} style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative' }}>
 
         {/* WebGL bg */}
-        <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false }} dpr={[1,1]}
-          frameloop="always"
+        <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false, powerPreference:'high-performance' }} dpr={[1,1]}
+          frameloop={canvasVisible ? 'always' : 'demand'}
           style={{ position:'absolute', inset:0, zIndex:0 }}>
           <BgScene project={active} />
         </Canvas>
