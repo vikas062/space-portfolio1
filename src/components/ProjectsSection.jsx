@@ -260,8 +260,15 @@ export default function ProjectsSection() {
         scrub: true,
         anticipatePin: 1,
         onUpdate: (self) => {
-          track.style.transform = `translateX(${-self.progress * maxShift}px)`;
-          const idx = Math.min(Math.floor(self.progress * PROJECTS.length), PROJECTS.length - 1);
+          const tail = window.innerHeight * 5;
+          const totalEnd = maxShift + tail;
+          const rawPx = self.progress * totalEnd;
+          // Clamp: horizontal scroll completes at last project, tail keeps pin
+          const tx = Math.min(rawPx, maxShift);
+          track.style.transform = `translateX(${-tx}px)`;
+          // Active project based on slide progress only (not tail)
+          const slideProgress = Math.min(rawPx / maxShift, 1);
+          const idx = Math.min(Math.floor(slideProgress * PROJECTS.length), PROJECTS.length - 1);
           if (idx !== activeRef.current) { activeRef.current = idx; setActive(PROJECTS[idx]); }
         },
       });
