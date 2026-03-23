@@ -293,7 +293,7 @@ function Scene({ domain }) {
 
 // ── Main Export ───────────────────────────────────────────────────────────────
 export default function SkillsSection() {
-  const [activeDomain, setActiveDomain] = useState(null);
+  const [activeDomain, setActiveDomain] = useState('tools'); // default: Tools visible on arrival
   const active = DOMAINS.find(d => d.id === activeDomain);
   const { ref: viewRef, inView } = useInView({ rootMargin: '200px 0px' });
 
@@ -303,7 +303,7 @@ export default function SkillsSection() {
     <section
       ref={viewRef}
       id="section-skills"
-      onMouseLeave={() => setActiveDomain(null)}
+      onMouseLeave={() => setActiveDomain('tools')}
       style={{
         width: '100vw',
         minHeight: '100vh',
@@ -376,7 +376,7 @@ export default function SkillsSection() {
         height: isMobile ? '50vw' : '100%',
         minHeight: isMobile ? '300px' : 'auto',
         zIndex: 5,
-        pointerEvents: active ? 'auto' : 'none',
+        pointerEvents: 'auto',
       }}>
         <AnimatePresence mode="wait">
           {active && (
@@ -412,20 +412,7 @@ export default function SkillsSection() {
           )}
         </AnimatePresence>
 
-        {!active && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            style={{
-              width: '100%', height: '100%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'rgba(255,255,255,0.07)',
-              fontSize: '1rem', letterSpacing: '0.1em', textTransform: 'uppercase',
-            }}
-          >
-            {isMobile ? '↑ Tap a domain' : '← Hover a domain'}
-          </motion.div>
-        )}
+
       </div>
     </section>
   );
