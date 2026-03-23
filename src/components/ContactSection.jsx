@@ -4,11 +4,20 @@ import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-thr
 import { BlendFunction } from 'postprocessing';
 import { Vector2 } from 'three';
 import * as THREE from 'three';
+
+const CA_OFFSET = new Vector2(0.0006, 0.0006);
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useInView } from '../hooks/useInView';
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ─── Load fonts ─── */
+if (typeof document !== 'undefined' && !document.getElementById('contact-font')) {
+  const l = document.createElement('link'); l.id = 'contact-font'; l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&family=Inter:wght@300;400&display=swap';
+  document.head.appendChild(l);
+}
 
 /* ─── GLSL nebula shaders (same domain-warped 7-octave shader) ─── */
 const NebulaVert = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
@@ -42,12 +51,11 @@ const NebulaFrag = `
 
 /* ─── Contact data ─── */
 const CONTACTS = [
-  { id:1, label:'LinkedIn',   value:'vikassingh62',         href:'https://www.linkedin.com/in/vikassingh62', icon:'💼', color:'#0a8df8' },
-  { id:2, label:'GitHub',     value:'vikas062',             href:'https://github.com/vikas062',              icon:'⬡',  color:'#e8e8e8' },
-  { id:3, label:'Email',      value:'vikassinghgkp6@gmail.com', href:'mailto:vikassinghgkp6@gmail.com',      icon:'✉',  color:'#ea4335' },
-  { id:4, label:'Mobile',     value:'+91-8112480820',       href:'tel:+918112480820',                        icon:'📡', color:'#44ffbb' },
-  { id:5, label:'Instagram',  value:'vikas_singh_.62',      href:'https://instagram.com/vikas_singh_.62',    icon:'◈',  color:'#e1306c' },
-  { id:6, label:'Reddit',     value:'vikas_singh_.62',      href:'https://reddit.com/user/vikas_singh_.62',  icon:'◉',  color:'#ff4500' },
+  { id:1, label:'LinkedIn',   value:'vikassingh62',          href:'https://www.linkedin.com/in/vikassingh62', sym:'in' },
+  { id:2, label:'GitHub',     value:'vikas062',              href:'https://github.com/vikas062',              sym:'gh' },
+  { id:3, label:'Email',      value:'vikassinghgkp6@gmail.com', href:'mailto:vikassinghgkp6@gmail.com',       sym:'@'  },
+  { id:5, label:'Instagram',  value:'vikas_singh_.62',       href:'https://instagram.com/vikas_singh_.62',    sym:'ig' },
+  { id:6, label:'Reddit',     value:'vikas_singh_.62',       href:'https://reddit.com/user/vikas_singh_.62',  sym:'r/' },
 ];
 
 /* ─── Stars ─── */
@@ -268,8 +276,8 @@ function Scene() {
       <SignalParticles />
 
       <EffectComposer>
-        <Bloom intensity={3.2} luminanceThreshold={0.15} luminanceSmoothing={0.7} radius={0.9} blendFunction={BlendFunction.ADD} />
-        <ChromaticAberration offset={new Vector2(0.0006, 0.0006)} radialModulation={false} modulationOffset={0} />
+        <Bloom intensity={0.6} luminanceThreshold={0.18} luminanceSmoothing={0.75} radius={0.8} blendFunction={BlendFunction.ADD} />
+        <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0} />
         <Vignette eskil={false} offset={0.1} darkness={0.9} />
       </EffectComposer>
     </>
@@ -278,12 +286,9 @@ function Scene() {
 
 /* ─── Contact card ─── */
 function ContactCard({ contact, index }) {
-  const cardRef = useRef();
   const [hovered, setHovered] = useState(false);
-
   return (
     <a
-      ref={cardRef}
       href={contact.href}
       target={contact.href.startsWith('http') ? '_blank' : '_self'}
       rel="noopener noreferrer"
@@ -292,71 +297,52 @@ function ContactCard({ contact, index }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex', flexDirection: 'column', gap: '0.5rem',
-        padding: '1.6rem 2rem',
-        background: hovered
-          ? `linear-gradient(135deg, ${contact.color}14 0%, rgba(8,12,30,0.96) 100%)`
-          : 'linear-gradient(135deg, rgba(6,8,24,0.92) 0%, rgba(4,6,18,0.88) 100%)',
-        border: `1px solid ${hovered ? contact.color + '88' : contact.color + '28'}`,
-        borderRadius: 18,
-        backdropFilter: 'blur(20px)',
+        display: 'flex', alignItems: 'center', gap: '1.4rem',
+        padding: '1.4rem 1.8rem',
+        background: hovered ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.02)',
+        border: `1px solid ${hovered ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.07)'}`,
+        borderRadius: 6,
         textDecoration: 'none',
-        position: 'relative', overflow: 'hidden',
-        transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-        transform: hovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)',
-        boxShadow: hovered
-          ? `0 0 0 1px ${contact.color}44, 0 24px 60px rgba(0,0,0,0.9), 0 0 60px ${contact.color}22`
-          : `0 0 0 1px ${contact.color}12, 0 16px 40px rgba(0,0,0,0.7)`,
+        transition: 'all 0.22s ease',
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
         cursor: 'pointer',
       }}
     >
-      {/* Top shimmer line */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-        background: `linear-gradient(90deg, transparent, ${contact.color}${hovered ? 'cc' : '44'}, transparent)`,
-        transition: 'all 0.35s ease',
-      }} />
+      {/* Symbol */}
+      <span style={{
+        fontFamily: "'JetBrains Mono',monospace",
+        fontSize: '.78rem', fontWeight: 400,
+        color: hovered ? 'rgba(255,255,255,.7)' : 'rgba(255,255,255,.55)',
+        minWidth: 28, textAlign: 'center',
+        transition: 'color .22s',
+      }}>{contact.sym}</span>
 
-      {/* Corner bracket */}
-      <div style={{
-        position: 'absolute', top: 14, right: 14, width: 16, height: 16,
-        borderTop: `1.5px solid ${contact.color}${hovered ? '88' : '33'}`,
-        borderRight: `1.5px solid ${contact.color}${hovered ? '88' : '33'}`,
-        transition: 'all 0.35s ease',
-      }} />
+      {/* Divider */}
+      <div style={{ width: 1, height: 32, background: hovered ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.06)', flexShrink: 0 }}/>
 
-      {/* Icon + platform row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-        <span style={{
-          fontSize: '1.4rem', lineHeight: 1,
-          filter: hovered ? `drop-shadow(0 0 10px ${contact.color})` : 'none',
-          transition: 'filter 0.35s ease',
-        }}>{contact.icon}</span>
-        <span style={{
-          fontFamily: 'monospace', fontSize: '0.55rem', letterSpacing: '0.3em',
-          textTransform: 'uppercase', fontWeight: 700,
-          color: hovered ? contact.color : contact.color + '88',
-          transition: 'color 0.3s ease',
-        }}>{contact.label}</span>
+      {/* Label + Value */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <div style={{
+          fontFamily: "'Space Grotesk',sans-serif",
+          fontSize: '.48rem', fontWeight: 500, letterSpacing: '.22em', textTransform: 'uppercase',
+          color: 'rgba(255,255,255,.7)', marginBottom: '.3rem',
+        }}>{contact.label}</div>
+        <div style={{
+          fontFamily: "'JetBrains Mono',monospace",
+          fontSize: '.72rem', fontWeight: 300,
+          color: hovered ? 'rgba(255,255,255,.98)' : 'rgba(255,255,255,.8)',
+          transition: 'color .22s',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>{contact.value}</div>
       </div>
 
-      {/* Value */}
-      <div style={{
-        fontSize: 'clamp(0.72rem, 1.2vw, 0.9rem)', fontWeight: 600,
-        color: hovered ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)',
-        letterSpacing: '-0.01em', paddingLeft: '2.1rem',
-        transition: 'color 0.3s ease',
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-      }}>{contact.value}</div>
-
-      {/* Hover arrow */}
-      {hovered && (
-        <div style={{
-          position: 'absolute', bottom: 14, right: 16,
-          fontFamily: 'monospace', fontSize: '0.55rem', color: contact.color + 'aa',
-          letterSpacing: '0.15em',
-        }}>OPEN ↗</div>
-      )}
+      {/* Arrow */}
+      <span style={{
+        fontFamily: "'Space Grotesk'",
+        fontSize: '.7rem', color: hovered ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.1)',
+        transition: 'all .22s', transform: hovered ? 'translate(2px,-2px)' : 'translate(0,0)',
+        flexShrink: 0,
+      }}>↗</span>
     </a>
   );
 }
@@ -407,7 +393,7 @@ export default function ContactSection() {
         position: 'relative', width: '100vw', minHeight: '100vh',
         background: '#00000a', overflow: 'hidden',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '6rem 4vw',
+        padding: '12rem 4vw 6rem',
       }}
     >
       {/* Top fade-in continues from Achievements */}
@@ -431,57 +417,61 @@ export default function ContactSection() {
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 960, margin: '0 auto' }}>
 
+        {/* Dark backdrop so text doesn't merge with nebula */}
+        <div style={{
+          position: 'absolute', inset: '-3rem -4rem',
+          background: 'radial-gradient(ellipse 80% 90% at 50% 50%, rgba(0,0,8,.72) 0%, transparent 100%)',
+          pointerEvents: 'none', zIndex: -1,
+        }}/>
+
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.2rem' }}>
-            <div style={{ width: '3rem', height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'.8rem', marginBottom:'1.8rem' }}>
+            <div style={{ width:'2rem', height:1, background:'rgba(255,255,255,.12)' }}/>
             <span style={{
-              fontFamily: 'monospace', color: 'rgba(255,255,255,0.25)', fontSize: '0.6rem',
-              textTransform: 'uppercase', letterSpacing: '0.4em', fontWeight: 500,
-            }}>Deep Space Transmission</span>
-            <div style={{ width: '3rem', height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+              fontFamily:"'JetBrains Mono',monospace", fontSize:'.5rem', fontWeight:300,
+              color:'rgba(255,255,255,.88)', letterSpacing:'.4em', textTransform:'uppercase',
+            }}>Contact</span>
+            <div style={{ width:'2rem', height:1, background:'rgba(255,255,255,.12)' }}/>
           </div>
 
           <h2 ref={titleRef} style={{
-            fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
-            fontWeight: 900, letterSpacing: '-0.04em', color: '#fff',
-            lineHeight: 0.92, margin: '0 0 1.4rem',
-            textShadow: '0 0 80px rgba(68,136,255,0.3)',
+            fontFamily:"'Space Grotesk',sans-serif",
+            fontSize:'clamp(3rem,7vw,6rem)',
+            fontWeight:700, letterSpacing:'-.05em', color:'#fff',
+            lineHeight:.88, margin:'0 0 1.4rem',
           }}>
-            <span style={{ opacity: 0.28, fontWeight: 300 }}>Let's </span>Connect
+            <span style={{ fontWeight:200, color:'rgba(255,255,255,.75)' }}>Let's&nbsp;</span>Connect
           </h2>
 
           <p ref={subRef} style={{
-            fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)',
-            color: 'rgba(255,255,255,0.32)', lineHeight: 1.7,
-            maxWidth: 420, margin: '0 auto',
+            fontFamily:"'Inter',sans-serif",
+            fontSize:'clamp(.85rem,1.2vw,1rem)', fontWeight:300,
+            color:'rgba(255,255,255,.88)', lineHeight:1.8,
+            maxWidth:360, margin:'0 auto',
+            letterSpacing:'.01em',
           }}>
-            Reach out across the void — I respond to all transmissions.
+            Open to collaborations, freelance work, and interesting conversations.
           </p>
         </div>
 
         {/* Contact grid */}
         <div ref={gridRef} style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '1.2rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '.8rem',
         }}>
           {CONTACTS.map((c, i) => <ContactCard key={c.id} contact={c} index={i} />)}
         </div>
 
-        {/* Bottom signal line */}
-        <div style={{
-          marginTop: '4rem', textAlign: 'center',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
-        }}>
-          <div style={{
-            width: 1, height: 48,
-            background: 'linear-gradient(to bottom, rgba(68,136,255,0.6), transparent)',
-          }} />
+        {/* Footer */}
+        <div style={{ marginTop:'4rem', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:'.8rem' }}>
+          <div style={{ width:1, height:40, background:'linear-gradient(to bottom,rgba(255,255,255,.15),transparent)' }}/>
           <span style={{
-            fontFamily: 'monospace', fontSize: '0.52rem',
-            color: 'rgba(255,255,255,0.18)', letterSpacing: '0.25em', textTransform: 'uppercase',
-          }}>Signal sent from Earth · {new Date().getFullYear()}</span>
+            fontFamily:"'JetBrains Mono',monospace", fontSize:'.42rem', fontWeight:300,
+            color:'rgba(255,255,255,.14)', letterSpacing:'.3em', textTransform:'uppercase',
+          }}>Vikas Singh · {new Date().getFullYear()}</span>
         </div>
       </div>
 

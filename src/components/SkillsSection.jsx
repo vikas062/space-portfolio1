@@ -97,20 +97,21 @@ function TechOrb({ name, index, total, color }) {
             opacity={0.25}
           />
         </mesh>
-        <Html center distanceFactor={6} style={{ pointerEvents: 'none' }}>
+        <Html center distanceFactor={6} style={{ pointerEvents: 'none' }} zIndexRange={[0, 0]}>
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            background: 'rgba(15, 15, 20, 0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${color}44`,
+            background: 'rgba(8, 8, 14, 0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: `1px solid ${color}33`,
             borderRadius: '14px',
             padding: '10px 14px',
             minWidth: '80px',
-            boxShadow: `0 0 20px ${color}44`,
+            boxShadow: `0 0 16px ${color}33`,
           }}>
             <i className={ICON_MAP[name] || 'devicon-github-original colored'} style={{ fontSize: '28px' }} />
             <span style={{
@@ -402,7 +403,7 @@ export default function SkillsSection() {
                   camera={{ position: [0, 0, 8], fov: 50 }}
                   dpr={[1, 1]}
                   frameloop={inView ? 'always' : 'never'}
-                  gl={{ antialias: true }}
+                  gl={{ antialias: false }}
                 >
                   <Scene domain={active} />
                 </Canvas>

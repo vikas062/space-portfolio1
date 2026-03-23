@@ -6,6 +6,8 @@ import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-thr
 import { BlendFunction } from 'postprocessing';
 import { useInView } from '../hooks/useInView';
 import { Vector2 } from 'three';
+
+const CA_OFFSET = new Vector2(0.0004, 0.0004);
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -832,10 +834,17 @@ export default function AchievementsSection() {
 
       <div style={{position:'sticky',top:0,width:'100vw',height:'100vh',overflow:'hidden'}}>
 
-        {/* Top fade-in — continues seamlessly from Certifications black */}
+        {/* Top fade */}
         <div style={{
           position:'absolute',top:0,left:0,right:0,height:'18vh',
           background:'linear-gradient(to bottom, #00000a 0%, transparent 100%)',
+          pointerEvents:'none',zIndex:25,
+        }}/>
+
+        {/* Bottom fade — blends seamlessly into CertificationsSection */}
+        <div style={{
+          position:'absolute',bottom:0,left:0,right:0,height:'22vh',
+          background:'linear-gradient(to top, #00000a 0%, transparent 100%)',
           pointerEvents:'none',zIndex:25,
         }}/>
 
@@ -872,7 +881,7 @@ export default function AchievementsSection() {
           frameloop={inView ? 'always' : 'never'}
           style={{position:'absolute',inset:0}}
         >
-          <color attach="background" args={['#01020d']} />
+          <color attach="background" args={['#00000a']} />
           <fog attach="fog" args={['#01020d',55,130]}/>
           {/* Cinematic lighting */}
           <directionalLight position={[28,18,12]} intensity={3.2} color="#fff8ee"/>
@@ -910,8 +919,8 @@ export default function AchievementsSection() {
           />
           <ScrollZoom scrollY={scrollY} />
           <EffectComposer>
-            <Bloom intensity={3.2} luminanceThreshold={0.12} luminanceSmoothing={0.7} radius={0.9} blendFunction={BlendFunction.ADD}/>
-            <ChromaticAberration offset={new Vector2(0.0006,0.0006)} radialModulation={false} modulationOffset={0}/>
+            <Bloom intensity={0.7} luminanceThreshold={0.18} luminanceSmoothing={0.75} radius={0.8} blendFunction={BlendFunction.ADD}/>
+            <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0}/>
             <Vignette eskil={false} offset={0.1} darkness={0.9}/>
           </EffectComposer>
         </Canvas>

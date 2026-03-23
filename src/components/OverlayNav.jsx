@@ -39,19 +39,36 @@ export default function OverlayNav() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > window.innerHeight * 0.7);
-      const sections = NAV_ITEMS.map(n => n.target.replace('#', ''));
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sections[i]);
-        if (el && window.scrollY >= el.offsetTop - 120) {
-          setActiveSection(sections[i]);
-          break;
-        }
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  /* IntersectionObserver — tracks which section is most visible.
+   * Works correctly with GSAP pinned hero (offsetTop approach breaks there). */
+  useEffect(() => {
+    const sectionIds = NAV_ITEMS.map(n => n.target.replace('#', ''));
+    const visible = {};
+
+    const pick = () => {
+      let bestId = sectionIds[0], bestRatio = -1;
+      sectionIds.forEach(id => {
+        if ((visible[id] ?? 0) > bestRatio) { bestRatio = visible[id]; bestId = id; }
+      });
+      setActiveSection(bestId);
+    };
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { visible[e.target.id] = e.intersectionRatio; });
+      pick();
+    }, { threshold: Array.from({length:21},(_,i)=>i/20) });
+
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
   }, []);
 
   const handleNavClick = (target) => {
@@ -91,19 +108,30 @@ export default function OverlayNav() {
               onClick={() => handleNavClick(target)}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#ffffff', fontSize: '0.92rem',
-                fontFamily: 'Inter, system-ui, sans-serif',
+                color: isActive ? '#ffffff' : 'rgba(255,255,255,.55)',
+                fontSize: '0.88rem',
+                fontFamily: "'Space Grotesk',Inter,system-ui,sans-serif",
                 fontWeight: isActive ? 600 : 400,
-                padding: '0.4rem 1rem', borderRadius: '6px',
-                opacity: isActive ? 1 : 0.85,
-                textShadow: scrolled ? 'none' : '0 1px 8px rgba(0,0,0,0.8)',
-                transition: 'opacity 0.2s, background 0.2s',
+                padding: '0.4rem 0.9rem',
+                borderRadius: '6px',
+                position: 'relative',
                 letterSpacing: '0.01em', userSelect: 'none', outline: 'none',
+                transition: 'color .2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = isActive ? '1' : '0.85'; e.currentTarget.style.background = 'none'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#ffffff'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = isActive ? '#ffffff' : 'rgba(255,255,255,.55)'; }}
             >
               {label}
+              {/* Active amber dot indicator */}
+              {isActive && (
+                <span style={{
+                  position: 'absolute', bottom: 1, left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 4, height: 4, borderRadius: '50%',
+                  background: 'rgba(255,160,50,.9)',
+                  display: 'block',
+                }}/>
+              )}
             </button>
           );
         })}
@@ -176,11 +204,14 @@ export default function OverlayNav() {
                 onClick={() => handleNavClick(target)}
                 style={{
                   width: '100%', maxWidth: '280px',
-                  background: isActive ? 'rgba(255,255,255,0.08)' : 'none',
-                  border: 'none', cursor: 'pointer', color: '#fff',
+                  background: isActive ? 'rgba(255,160,50,.12)' : 'none',
+                  border: isActive ? '1px solid rgba(255,160,50,.3)' : '1px solid transparent',
+                  cursor: 'pointer',
+                  color: isActive ? '#fff' : 'rgba(255,255,255,.65)',
                   fontSize: '1rem', fontWeight: isActive ? 600 : 400,
                   padding: '0.8rem 1.5rem', borderRadius: '10px',
                   textAlign: 'center', letterSpacing: '0.02em',
+                  transition: 'all .2s',
                 }}
               >
                 {label}

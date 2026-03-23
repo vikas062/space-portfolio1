@@ -1,195 +1,289 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
+import * as THREE from 'three';
 import gsap from 'gsap';
 import { useInView } from '../hooks/useInView';
 
+/* ─── Projects ─── */
 const PROJECTS = [
-  { id: 1, name: 'DSA Compass', image: '/projects/project1.png', link: '#' },
-  { id: 2, name: 'Cohort',      image: '/projects/project2.png', link: 'https://cohort-zeta.vercel.app/' },
+  {
+    id: '01',
+    name: 'DSA Compass',
+    category: 'Learning Platform',
+    year: '2024',
+    link: '#',
+    image: '/projects/project1.png',
+    desc: 'A precision navigation system for competitive programmers — intelligent spaced-repetition engine, DSA concept tracking, and progress visualization built for those who want to master algorithms deliberately.',
+    tech: ['React', 'Node.js', 'MongoDB', 'GSAP'],
+    accent: '#d4a84b',
+    dim:    'rgba(212,168,75,0.12)',
+    mid:    'rgba(212,168,75,0.35)',
+    nebulaA: '#3d2200',
+    nebulaB: '#1a0d00',
+  },
+  {
+    id: '02',
+    name: 'Cohort',
+    category: 'Collaboration Hub',
+    year: '2024',
+    link: 'https://cohort-zeta.vercel.app/',
+    image: '/projects/project2.png',
+    desc: 'A full-stack developer platform for real-time cohort collaboration — live-coding sessions, peer discovery engine, and integrated project management for developers who build together.',
+    tech: ['React', 'Express', 'Socket.io', 'PostgreSQL'],
+    accent: '#5b9eff',
+    dim:    'rgba(91,158,255,0.12)',
+    mid:    'rgba(91,158,255,0.35)',
+    nebulaA: '#001133',
+    nebulaB: '#000a22',
+  },
 ];
 
-const LENS_R = 90;
-
-// ── Lens Window ───────────────────────────────────────────────────────────────
-function useLens(canvasRef, imgRef, mp, it, inView) {
-  const inViewRef = useRef(inView);
-  inViewRef.current = inView;
-
-  useEffect(() => {
-    const canvas = canvasRef.current, ctx = canvas.getContext('2d'), img = imgRef.current;
-    let t = 0, raf;
-    const resize = () => {
-      // Cap DPR to 1.5 to save performance on retina
-      const dpr = Math.min(devicePixelRatio, 1.5);
-      canvas.width  = (canvas.offsetWidth  || window.innerWidth)  * dpr;
-      canvas.height = (canvas.offsetHeight || window.innerHeight) * dpr;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-    const draw = () => {
-      raf = requestAnimationFrame(draw);
-      if (!inViewRef.current) return; // Skip 100% of GPU work when offscreen
-      
-      t += 0.05;
-      const W=canvas.width, H=canvas.height, dpr=Math.min(devicePixelRatio, 1.5);
-      const mx=mp.current.x*dpr, my=mp.current.y*dpr;
-      const R=Math.round(LENS_R*dpr*it.current);
-      ctx.clearRect(0,0,W,H);
-      if(!img.complete||!img.naturalWidth||R<2) return;
-      const sc=Math.max(W/img.naturalWidth,H/img.naturalHeight);
-      const bx=(W-img.naturalWidth*sc)/2, by=(H-img.naturalHeight*sc)/2;
-      const zoom=1.3+Math.sin(t*.7)*.02;
-      const sx=(mx-bx)/sc, sy=(my-by)/sc, sr=(R/sc)/zoom;
-      ctx.save();ctx.beginPath();ctx.arc(mx,my,R,0,Math.PI*2);ctx.clip();
-      ctx.drawImage(img,sx-sr,sy-sr,sr*2,sr*2,mx-R,my-R,R*2,R*2);
-      const w=Math.sin(t*3.5)*5;
-      ctx.globalAlpha=.15;ctx.drawImage(img,sx-sr+w/sc,sy-sr,sr*2,sr*2,mx-R,my-R,R*2,R*2);ctx.globalAlpha=1;
-      const g=ctx.createRadialGradient(mx-R*.28,my-R*.28,0,mx,my,R);
-      g.addColorStop(0,'rgba(255,255,255,.16)');g.addColorStop(.45,'rgba(255,255,255,.05)');g.addColorStop(1,'rgba(255,255,255,0)');
-      ctx.fillStyle=g;ctx.fill();ctx.restore();
-      ctx.save();ctx.beginPath();ctx.arc(mx,my,R,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(255,255,255,${.8*it.current})`;ctx.lineWidth=1.5*dpr;ctx.stroke();ctx.restore();
-    };
-    raf=requestAnimationFrame(draw);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);};
-  },[]);
+/* ─── minimal WebGL background ─── */
+const NVert = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const NFrag = `
+  uniform float uTime; uniform vec3 uCol; varying vec2 vUv;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+  float fbm(vec2 p){float v=0.0,a=0.5,fr=1.0;for(int i=0;i<4;i++){v+=a*noise(p*fr);fr*=2.1;a*=0.5;}return v;}
+  void main(){
+    vec2 uv=(vUv-0.5)*2.0;
+    float f=fbm(uv*0.9+vec2(uTime*0.008,0.0))*1.1;
+    float alpha=f*(1.0-smoothstep(0.3,1.0,length(uv)));
+    gl_FragColor=vec4(uCol*f*1.4, alpha*0.22);
+  }
+`;
+function NebulaPlane({ pos, size, col, t=0 }) {
+  const mat = useMemo(() => new THREE.ShaderMaterial({
+    vertexShader: NVert, fragmentShader: NFrag,
+    uniforms: { uTime:{value:0}, uCol:{value:new THREE.Color(col)} },
+    transparent:true, depthWrite:false, side:THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  }), [col]);
+  useFrame(({clock}) => { mat.uniforms.uTime.value = clock.getElapsedTime()+t; });
+  return <mesh position={pos} scale={size} material={mat}><planeGeometry args={[1,1]}/></mesh>;
+}
+function Stars() {
+  const ref = useRef();
+  const geo = useMemo(() => {
+    const n=1800, p=new Float32Array(n*3);
+    for (let i=0;i<n;i++){
+      const r=70+Math.random()*200, t=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
+      p[i*3]=r*Math.sin(ph)*Math.cos(t); p[i*3+1]=r*Math.sin(ph)*Math.sin(t); p[i*3+2]=r*Math.cos(ph);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p,3)); return g;
+  }, []);
+  useFrame(({clock}) => { if(ref.current) ref.current.rotation.y = clock.getElapsedTime()*0.001; });
+  return <points ref={ref} geometry={geo}><pointsMaterial color="#ffffff" size={0.13} transparent opacity={0.7} sizeAttenuation depthWrite={false} blending={THREE.AdditiveBlending}/></points>;
+}
+function BgScene({ project }) {
+  return (
+    <>
+      <color attach="background" args={['#040410']} />
+      <Stars />
+      <NebulaPlane pos={[-30,8,-65]}  size={55} col={project.nebulaA} t={0} />
+      <NebulaPlane pos={[35,-6,-70]}  size={60} col={project.nebulaB} t={4} />
+      <NebulaPlane pos={[0,22,-60]}   size={42} col={project.nebulaA} t={8} />
+      <EffectComposer>
+        <Bloom intensity={3} luminanceThreshold={0.12} luminanceSmoothing={0.7} radius={0.9} blendFunction={BlendFunction.ADD}/>
+      </EffectComposer>
+    </>
+  );
 }
 
-// ── Card ──────────────────────────────────────────────────────────────────────
-function Card({ project, inView }) {
-  const wrapRef=useRef(null), imgRef=useRef(null), canvasRef=useRef(null), lensRef=useRef(null);
-  const mp=useRef({x:-999,y:-999}), it=useRef(0);
-  useLens(canvasRef,imgRef,mp,it,inView);
+/* ─── Clean Project Card ─── */
+function Card({ project, cardRef }) {
+  const elRef = useRef();
 
-  const onMove=e=>{
-    const r=wrapRef.current.getBoundingClientRect();
-    mp.current={x:e.clientX-r.left,y:e.clientY-r.top};
-    if(lensRef.current){lensRef.current.style.left=`${mp.current.x}px`;lensRef.current.style.top=`${mp.current.y}px`;}
+  useEffect(() => {
+    if (!elRef.current) return;
+    gsap.fromTo(elRef.current.children,
+      { opacity:0, y:24, filter:'blur(6px)' },
+      { opacity:1, y:0, filter:'blur(0px)', duration:0.75, stagger:0.09, ease:'power3.out' }
+    );
+  }, [project.id]);
 
-    // Dynamic 3D screen shake/float effect
-    const nx = (e.clientX / window.innerWidth - 0.5) * 2;   // -1 to 1
-    const ny = (e.clientY / window.innerHeight - 0.5) * 2;  // -1 to 1
+  return (
+    <div ref={cardRef} style={{
+      width:'100vw', height:'100vh', flexShrink:0,
+      display:'grid', gridTemplateColumns:'1fr 1fr',
+      alignItems:'center', gap:'5vw', padding:'0 7vw',
+    }}>
 
-    gsap.to(wrapRef.current, {
-      x: nx * -40,
-      y: ny * -40,
-      rotationY: nx * 6,
-      rotationX: ny * -6,
-      scale: 1.08,             // scale up slightly so edges don't show when moving
-      duration: 0.8,
-      ease: 'power2.out',
-      overwrite: 'auto'
-    });
-  };
-  const onEnter=()=>{
-    gsap.to(it,{current:1,duration:.4,ease:'power2.out',overwrite:true});
-    lensRef.current&&gsap.to(lensRef.current,{opacity:1,scale:1,duration:.35,ease:'back.out(2)'});
-  };
-  const onLeave=()=>{
-    mp.current={x:-999,y:-999};
-    gsap.to(it,{current:0,duration:.4,ease:'power2.in',overwrite:true});
-    lensRef.current&&gsap.to(lensRef.current,{opacity:0,scale:.4,duration:.2});
+      {/* Left: Text */}
+      <div ref={elRef} style={{ display:'flex', flexDirection:'column' }}>
 
-    // Reset 3D transform when mouse leaves
-    gsap.to(wrapRef.current, {
-      x: 0, y: 0, rotationY: 0, rotationX: 0, scale: 1,
-      duration: 1.5, ease: 'power3.out', overwrite: 'auto'
-    });
-  };
+        {/* Label */}
+        <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'2rem', opacity:0 }}>
+          <span style={{ fontFamily:'monospace', fontSize:'0.5rem', color:project.accent, opacity:0.6, letterSpacing:'0.35em', textTransform:'uppercase' }}>{project.category}</span>
+          <div style={{ width:1, height:10, background:'rgba(255,255,255,0.2)' }}/>
+          <span style={{ fontFamily:'monospace', fontSize:'0.5rem', color:'rgba(255,255,255,0.3)', letterSpacing:'0.25em' }}>{project.year}</span>
+        </div>
 
-  const onClick = () => {
-    if (project.link && project.link !== '#') {
-      window.open(project.link, '_blank'); // Opens the URL in a new tab
-    }
-  };
+        {/* Title */}
+        <h2 style={{
+          fontSize:'clamp(3.2rem, 5.5vw, 5.5rem)',
+          fontWeight:900, letterSpacing:'-0.04em', lineHeight:0.9,
+          color:'#fff', margin:'0 0 1.4rem', opacity:0,
+        }}>{project.name}</h2>
 
-  return(
-    <div ref={wrapRef} style={{position:'absolute',inset:0,cursor:'none',perspective:'1200px',transformOrigin:'center center'}}
-      onMouseMove={onMove} onMouseEnter={onEnter} onMouseLeave={onLeave} onClick={onClick}>
-      <img ref={imgRef} src={project.image} alt={project.name}
-        style={{width:'100%',height:'100%',objectFit:'cover',display:'block',pointerEvents:'none',userSelect:'none'}}/>
-      <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(255,255,255,.1) 0%,rgba(255,255,255,.03) 35%,transparent 65%)',pointerEvents:'none',mixBlendMode:'overlay'}}/>
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.55) 100%)',pointerEvents:'none'}}/>
-      <canvas ref={canvasRef} style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none'}}/>
-      {/* VIEW lens */}
-      <div ref={lensRef} style={{position:'absolute',left:0,top:0,width:LENS_R*2,height:LENS_R*2,transform:'translate(-50%,-50%)',display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0,zIndex:10}}>
-        <span style={{color:'#fff',fontSize:'11px',fontWeight:700,fontFamily:'Inter,sans-serif',letterSpacing:'.18em',textTransform:'uppercase',textShadow:'0 1px 8px rgba(0,0,0,.95)'}}>VIEW</span>
+        {/* Accent line */}
+        <div style={{ width:'3rem', height:1, background:project.accent, opacity:0.6, marginBottom:'1.4rem', opacity:0 }}/>
+
+        {/* Desc */}
+        <p style={{
+          fontSize:'clamp(0.78rem,1.05vw,0.9rem)', color:'rgba(255,255,255,0.42)',
+          lineHeight:1.85, maxWidth:380, margin:'0 0 1.8rem', opacity:0,
+        }}>{project.desc}</p>
+
+        {/* Tags */}
+        <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap', marginBottom:'2.2rem', opacity:0 }}>
+          {project.tech.map(t => (
+            <span key={t} style={{
+              fontFamily:'monospace', fontSize:'0.5rem', color:project.accent,
+              border:`1px solid ${project.mid}`, borderRadius:4,
+              padding:'0.2rem 0.6rem', background:project.dim, letterSpacing:'0.08em',
+            }}>{t}</span>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div style={{ opacity:0 }}>
+          {project.link !== '#' ? (
+            <a href={project.link} target="_blank" rel="noopener noreferrer" style={{
+              display:'inline-flex', alignItems:'center', gap:'0.5rem',
+              fontFamily:'monospace', fontSize:'0.56rem', fontWeight:700,
+              letterSpacing:'0.16em', textTransform:'uppercase',
+              color:'#040410', background:project.accent,
+              textDecoration:'none', padding:'0.72rem 1.5rem', borderRadius:5,
+              boxShadow:`0 0 28px ${project.accent}44`,
+              transition:'opacity .2s, transform .2s',
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.opacity='.85';e.currentTarget.style.transform='translateY(-2px)';}}
+            onMouseLeave={e=>{e.currentTarget.style.opacity='1';e.currentTarget.style.transform='translateY(0)';}}>
+              View Project <span style={{fontSize:'0.9rem'}}>↗</span>
+            </a>
+          ) : (
+            <span style={{ fontFamily:'monospace', fontSize:'0.5rem', color:'rgba(255,255,255,0.2)', letterSpacing:'0.2em' }}>Coming Soon</span>
+          )}
+        </div>
       </div>
-      {/* Label */}
-      <div style={{position:'absolute',bottom:'2rem',left:'2.5rem',zIndex:20,pointerEvents:'none'}}>
-        <p style={{color:'rgba(255,255,255,.35)',fontSize:'.7rem',fontFamily:'Inter,sans-serif',fontWeight:500,letterSpacing:'.2em',textTransform:'uppercase',margin:0}}>
-          {String(project.id).padStart(2,'0')} / {project.name}
-        </p>
+
+      {/* Right: Image */}
+      <div style={{ position:'relative' }}>
+        {/* Glow */}
+        <div style={{
+          position:'absolute', inset:-4,
+          borderRadius:16,
+          background:`radial-gradient(ellipse at center, ${project.mid} 0%, transparent 65%)`,
+          filter:'blur(24px)', opacity:0.8, zIndex:0,
+        }}/>
+        {/* Card */}
+        <div style={{
+          position:'relative', zIndex:1,
+          borderRadius:12, overflow:'hidden',
+          border:`1px solid ${project.mid}`,
+          background:'#08080f',
+          boxShadow:`0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04)`,
+        }}>
+          {/* Browser bar */}
+          <div style={{
+            background:'rgba(255,255,255,0.035)',
+            borderBottom:`1px solid rgba(255,255,255,0.06)`,
+            padding:'0.5rem 0.85rem',
+            display:'flex', alignItems:'center', gap:'0.4rem',
+          }}>
+            {['#ff5f57','#ffbf2f','#28c840'].map(c => (
+              <div key={c} style={{ width:7,height:7,borderRadius:'50%',background:c,opacity:0.75 }}/>
+            ))}
+            <div style={{
+              flex:1, marginLeft:'0.7rem', background:'rgba(255,255,255,0.04)',
+              border:'1px solid rgba(255,255,255,0.06)', borderRadius:3, height:13,
+              display:'flex', alignItems:'center', padding:'0 0.5rem',
+            }}>
+              <span style={{ fontFamily:'monospace', fontSize:'0.36rem', color:'rgba(255,255,255,0.2)' }}>
+                {project.link !== '#' ? project.link : 'localhost:5173'}
+              </span>
+            </div>
+          </div>
+          <img
+            src={project.image} alt={project.name}
+            style={{ width:'100%', height:'auto', display:'block', objectFit:'contain', background:'#08080f' }}
+            onError={e => {
+              e.target.style.display='none';
+              e.target.parentElement.style.minHeight='200px';
+              e.target.parentElement.style.background=`linear-gradient(135deg,${project.nebulaA}99,${project.nebulaB}55)`;
+            }}
+          />
+          <div style={{ position:'absolute', inset:0, background:`linear-gradient(135deg,rgba(255,255,255,0.04) 0%,transparent 30%)`, pointerEvents:'none' }}/>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Section ───────────────────────────────────────────────────────────────────
+
+
+/* ─── Main ─── */
 export default function ProjectsSection() {
-  const outerRef = useRef(null);
-  const stageRef = useRef(null);
-  const c1Ref    = useRef(null);   // front
-  const c2Ref    = useRef(null);   // slides up from below
-  
-  const { ref: viewRef, inView } = useInView({ rootMargin: '200px 0px' });
+  const outerRef    = useRef(null);
+  const trackRef    = useRef(null);
+  const progressRef = useRef(0);
+  const activeRef   = useRef(0);
+  const { ref:viewRef, inView } = useInView({ rootMargin:'0px' });
+  const [active, setActive] = React.useState(PROJECTS[0]);
+
+  const refs = [useRef(null), useRef(null)];
 
   useEffect(() => {
-    const c1 = c1Ref.current;
-    const c2 = c2Ref.current;
-    const outer = outerRef.current;
-
+    const outer = outerRef.current, track = trackRef.current;
     const onScroll = () => {
       const rect  = outer.getBoundingClientRect();
       const total = outer.offsetHeight - window.innerHeight;
-      const scrolled = Math.max(0, -rect.top);
-      const raw = Math.min(scrolled / total, 1);
-
-      // Total scroll is massive.
-      // 0 to 0.2: Hold Project 1 entirely
-      // 0.2 to 0.8: VERY slow, luxurious transition
-      // 0.8 to 1.0: Hold Project 2 entirely
-      const p    = Math.min(1, Math.max(0, (raw - 0.2) / 0.6));
-      const ease = p < 0.5 ? 2*p*p : -1 + (4-2*p)*p;
-
-      // c1: Very slow, gentle zoom out, fade out, and soft depth blur
-      const sc1 = 1 + ease * 0.08;
-      const op1 = Math.max(0, 1 - ease * 1.8);
-      const blur1 = ease * 8; // subtle back-blur
-      const dark1 = ease * 0.5; // darkens by up to 50%
-      c1.style.transform = `scale(${sc1})`;
-      c1.style.opacity   = op1;
-      c1.style.filter    = `blur(${blur1}px) brightness(${1 - dark1})`;
-
-      // c2: Slow, graceful slide up from bottom with a slight parallax scale from 0.92
-      const yPct = 100 * (1 - ease);
-      const sc2  = 0.92 + (0.08 * ease);
-      c2.style.clipPath  = 'none'; // remove previous circle mask explicitly
-      c2.style.transform = `translateY(${yPct}vh) scale(${sc2})`;
+      const prog  = Math.min(Math.max(0,-rect.top)/total, 1);
+      progressRef.current = prog;
+      track.style.transform = `translateX(${-prog*(track.scrollWidth-window.innerWidth)}px)`;
+      const idx = Math.min(Math.floor(prog*PROJECTS.length), PROJECTS.length-1);
+      if (idx !== activeRef.current) { activeRef.current=idx; setActive(PROJECTS[idx]); }
     };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); 
+    window.addEventListener('scroll', onScroll, { passive:true });
+    onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
-    <div ref={(el) => { outerRef.current = el; viewRef.current = el; }} id="section-projects"
-      style={{position:'relative',width:'100vw',height:'250vh',backgroundColor:'#07070c'}}>
+    <div ref={(el)=>{ outerRef.current=el; viewRef.current=el; }}
+      id="section-projects"
+      style={{ position:'relative', width:'100vw', height:`${PROJECTS.length*100}vh`, background:'#040410' }}>
+      <div style={{ position:'sticky', top:0, width:'100vw', height:'100vh', overflow:'hidden' }}>
 
-      {/* Sticky stage */}
-      <div ref={stageRef}
-        style={{position:'sticky',top:0,width:'100vw',height:'100vh',overflow:'hidden',backgroundColor:'#07070c'}}>
+        {/* WebGL bg */}
+        <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false }} dpr={[1,1]}
+          frameloop={inView?'always':'never'}
+          style={{ position:'absolute', inset:0, zIndex:0 }}>
+          <BgScene project={active} />
+        </Canvas>
 
-        {/* Card 1 — Back layer zooming out into darkness */}
-        <div ref={c1Ref} style={{position:'absolute',inset:0,transformOrigin:'center center',zIndex:1}}>
-          <Card project={PROJECTS[0]} inView={inView} />
+        {/* Subtle radial darkening at edges so cards pop */}
+        <div style={{ position:'absolute', inset:0, zIndex:1, pointerEvents:'none',
+          background:'radial-gradient(ellipse at center, transparent 40%, rgba(4,4,16,0.7) 100%)' }}/>
+
+        {/* Top label */}
+        <div style={{ position:'absolute', top:'2.2rem', left:'50%', transform:'translateX(-50%)', zIndex:30, pointerEvents:'none', display:'flex', alignItems:'center', gap:'0.8rem' }}>
+          <div style={{ width:'2.5rem', height:1, background:'rgba(255,255,255,0.1)' }}/>
+          <span style={{ fontFamily:'monospace', fontSize:'0.48rem', color:'rgba(255,255,255,0.18)', letterSpacing:'0.5em', textTransform:'uppercase' }}>Selected Work</span>
+          <div style={{ width:'2.5rem', height:1, background:'rgba(255,255,255,0.1)' }}/>
         </div>
 
-        {/* Card 2 — Floating up elegantly from off-screen on top */}
-        <div ref={c2Ref} style={{position:'absolute',inset:0,transformOrigin:'center center',zIndex:2,transform:'translateY(100vh)'}}>
-          <Card project={PROJECTS[1]} inView={inView} />
+        {/* Track */}
+        <div ref={trackRef} style={{ display:'flex', width:`${PROJECTS.length*100}vw`, height:'100%', position:'relative', zIndex:10, willChange:'transform' }}>
+          {PROJECTS.map((p,i) => <Card key={p.id} project={p} cardRef={refs[i]} />)}
         </div>
 
+
+
+        <div style={{ position:'absolute', top:0,left:0,right:0,height:'10vh',background:'linear-gradient(to bottom,#07070c,transparent)',pointerEvents:'none',zIndex:20 }}/>
+        <div style={{ position:'absolute', bottom:0,left:0,right:0,height:'10vh',background:'linear-gradient(to top,#010208,transparent)',pointerEvents:'none',zIndex:20 }}/>
       </div>
     </div>
   );

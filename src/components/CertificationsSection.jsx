@@ -5,6 +5,8 @@ import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-thr
 import { BlendFunction } from 'postprocessing';
 import { TextureLoader, Vector2 } from 'three';
 import * as THREE from 'three';
+
+const CA_OFFSET = new Vector2(0.0004, 0.0004);
 import { useInView } from '../hooks/useInView';
 
 /* ─── GLSL volumetric nebula (same domain-warped shader as Achievements) ─── */
@@ -191,52 +193,98 @@ function SpaceDust() {
 }
 
 
+
 function CentralStar() {
-  const coreRef=useRef(), c1=useRef(), c2=useRef(), c3=useRef();
-  useFrame(({clock})=>{
-    const t=clock.getElapsedTime();
-    if(coreRef.current){ coreRef.current.scale.setScalar(1+Math.sin(t*1.6)*0.05); coreRef.current.rotation.y=t*0.15; }
-    if(c1.current) c1.current.scale.setScalar(1+Math.sin(t*1.0+1)*0.08);
-    if(c2.current) c2.current.scale.setScalar(1+Math.sin(t*0.7+2)*0.11);
-    if(c3.current) c3.current.scale.setScalar(1+Math.sin(t*0.4+3)*0.16);
+  const coreRef=useRef(), c1=useRef(), c2=useRef(), c3=useRef(), c4=useRef();
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    if (coreRef.current) coreRef.current.rotation.y = t * 0.12;
+    if (c1.current) c1.current.scale.setScalar(1 + Math.sin(t*1.1+1)*0.07);
+    if (c2.current) c2.current.scale.setScalar(1 + Math.sin(t*0.75+2)*0.12);
+    if (c3.current) c3.current.scale.setScalar(1 + Math.sin(t*0.45+3)*0.18);
+    if (c4.current) c4.current.scale.setScalar(1 + Math.sin(t*0.3+4)*0.24);
   });
-  // Layered glow – the Bloom will pick these up and make them beautiful
   return (
     <group>
-      {/* Outermost diffuse corona */}
-      <mesh ref={c3}>
-        <sphereGeometry args={[2.8,32,32]} />
-        <meshBasicMaterial color="#ff4400" transparent opacity={0.03} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </mesh>
-      <mesh ref={c2}>
-        <sphereGeometry args={[1.8,32,32]} />
-        <meshBasicMaterial color="#ff8800" transparent opacity={0.08} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </mesh>
-      <mesh ref={c1}>
-        <sphereGeometry args={[1.1,32,32]} />
-        <meshBasicMaterial color="#ffcc44" transparent opacity={0.4} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </mesh>
-      {/* Hot white core */}
-      <mesh ref={coreRef}>
-        <sphereGeometry args={[0.55,48,48]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
-      {/* Lights that illuminate the cert planes */}
-      <pointLight intensity={3}  color="#ffe8aa" decay={0.5} />
-      <pointLight intensity={8} color="#ffcc44" decay={1.0} />
+      <mesh ref={c4}><sphereGeometry args={[3.8,32,32]}/><meshBasicMaterial color="#ff2200" transparent opacity={0.014} depthWrite={false} blending={THREE.AdditiveBlending}/></mesh>
+      <mesh ref={c3}><sphereGeometry args={[2.8,32,32]}/><meshBasicMaterial color="#ff5500" transparent opacity={0.032} depthWrite={false} blending={THREE.AdditiveBlending}/></mesh>
+      <mesh ref={c2}><sphereGeometry args={[1.9,32,32]}/><meshBasicMaterial color="#ff8800" transparent opacity={0.10} depthWrite={false} blending={THREE.AdditiveBlending}/></mesh>
+      <mesh ref={c1}><sphereGeometry args={[1.15,32,32]}/><meshBasicMaterial color="#ffcc44" transparent opacity={0.48} depthWrite={false} blending={THREE.AdditiveBlending}/></mesh>
+      {/* Solid bright core — white-yellow, no shader, no flicker */}
+      <mesh ref={coreRef}><sphereGeometry args={[0.58,48,48]}/><meshBasicMaterial color="#fff5cc"/></mesh>
+      <pointLight intensity={4}  color="#ffe8aa" decay={0.5}/>
+      <pointLight intensity={10} color="#ffcc44" decay={1.0}/>
     </group>
   );
 }
 
-/* ── Orbit ring ────────────────────────────────── */
+/* ── Orbit ring — glowing, thicker ─────────────── */
 function Ring({ radius, tilt, color }) {
-  const geo=useMemo(()=>new THREE.TorusGeometry(radius,0.012,4,256),[radius]);
+  const geo = useMemo(() => new THREE.TorusGeometry(radius, 0.025, 6, 360), [radius]);
   return (
-    <mesh geometry={geo} rotation={[Math.PI/2+tilt,0,0]}>
-      <meshBasicMaterial color={color} transparent opacity={0.25} depthWrite={false} blending={THREE.AdditiveBlending} />
+    <mesh geometry={geo} rotation={[Math.PI/2 + tilt, 0, 0]}>
+      <meshBasicMaterial color={color} transparent opacity={0.45} depthWrite={false} blending={THREE.AdditiveBlending} />
     </mesh>
   );
 }
+
+/* ── Glowing particle riding each orbit (comet trail) ── */
+function OrbitRider({ radius, tilt, speed, phase, color }) {
+  const headRef  = useRef();
+  const angleRef = useRef(phase + Math.PI);
+
+  // Pre-fill trail at starting position so there's no origin flash on mount
+  const startA = phase + Math.PI;
+  const startX = Math.cos(startA) * radius;
+  const startZ = Math.sin(startA) * radius;
+  const startY = Math.sin(startA * 2.3 + phase) * tilt * 1.8;
+
+  const trailGeo = useMemo(() => {
+    const n = 28;
+    const p = new Float32Array(n * 3);
+    // Initialize all trail points at start pos — no origin flash
+    for (let i = 0; i < n; i++) {
+      p[i*3] = startX; p[i*3+1] = startY; p[i*3+2] = startZ;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    return g;
+  }, []);
+
+  useFrame(() => {
+    angleRef.current += speed * 0.006;
+    const a = angleRef.current;
+    const x = Math.cos(a) * radius;
+    const z = Math.sin(a) * radius;
+    const y = Math.sin(a * 2.3 + phase) * tilt * 1.8;
+
+    if (headRef.current) headRef.current.position.set(x, y, z);
+
+    const arr = trailGeo.attributes.position.array;
+    const cnt = arr.length / 3;
+    for (let i = cnt - 1; i > 0; i--) {
+      arr[i*3]   = arr[(i-1)*3];
+      arr[i*3+1] = arr[(i-1)*3+1];
+      arr[i*3+2] = arr[(i-1)*3+2];
+    }
+    arr[0] = x; arr[1] = y; arr[2] = z;
+    trailGeo.attributes.position.needsUpdate = true;
+  });
+
+  return (
+    <group>
+      <mesh ref={headRef} position={[startX, startY, startZ]}>
+        <sphereGeometry args={[0.13, 8, 8]} />
+        <meshBasicMaterial color={color} depthWrite={false} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <points geometry={trailGeo}>
+        <pointsMaterial color={color} size={0.06} transparent opacity={0.5}
+          sizeAttenuation depthWrite={false} blending={THREE.AdditiveBlending}/>
+      </points>
+    </group>
+  );
+}
+
 
 /* ── Certificate frame (planet) ─────────────── */
 function CertFrame({ data, index, onSelect }) {
@@ -364,6 +412,12 @@ export default function CertificationsSection() {
           <div style={{position:'absolute',inset:0,zIndex:2,pointerEvents:'none',
             background:'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, #00000a 100%)'}}/>
 
+          {/* Top fade \u2014 blends from AchievementsSection seamlessly */}
+          <div style={{
+            position:'absolute',top:0,left:0,right:0,height:'20vh',
+            background:'linear-gradient(to bottom, #00000a 0%, transparent 100%)',
+            pointerEvents:'none',zIndex:25,
+          }}/>
           {/* Label */}
           <div style={{position:'absolute',top:'2rem',left:'4vw',zIndex:20,pointerEvents:'none',display:'flex',alignItems:'center',gap:'1rem'}}>
             <div style={{width:'2rem',height:'1px',background:'rgba(255,255,255,0.25)'}}/>
@@ -408,11 +462,10 @@ export default function CertificationsSection() {
             {/* Full free-orbit controls — drag anywhere for 360° rotation */}
             <OrbitControls
               enablePan={false}
+              enableZoom={false}
               enableDamping
               dampingFactor={0.06}
               rotateSpeed={0.55}
-              minDistance={6}
-              maxDistance={28}
               target={[0,0,0]}
             />
             <ScrollZoom scrollY={scrollY} />
@@ -435,19 +488,22 @@ export default function CertificationsSection() {
             {ORBITS.map(o=>(
               <Ring key={o.id} radius={o.radius} tilt={o.tilt} color={o.color} />
             ))}
+            {ORBITS.map(o=>(
+              <OrbitRider key={'r'+o.id} radius={o.radius} tilt={o.tilt} speed={o.speed} phase={o.phase} color={o.color} />
+            ))}
             {ORBITS.map((o,i)=>(
               <CertFrame key={o.id} data={o} index={i} onSelect={setSelected} />
             ))}
 
             <EffectComposer>
               <Bloom
-                intensity={3.2}
-                luminanceThreshold={0.15}
-                luminanceSmoothing={0.7}
-                radius={0.9}
+                intensity={0.7}
+                luminanceThreshold={0.18}
+                luminanceSmoothing={0.75}
+                radius={0.8}
                 blendFunction={BlendFunction.ADD}
               />
-              <ChromaticAberration offset={new Vector2(0.0006, 0.0006)} radialModulation={false} modulationOffset={0} />
+              <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0} />
               <Vignette eskil={false} offset={0.1} darkness={0.9} />
             </EffectComposer>
           </Canvas>
