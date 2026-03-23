@@ -830,14 +830,7 @@ export default function AchievementsSection() {
     return () => { el.removeEventListener('mouseenter', enter); el.removeEventListener('mouseleave', leave); };
   }, []);
 
-  useEffect(()=>{
-    if(!hdrRef.current)return;
-    const ctx=gsap.context(()=>{
-      gsap.fromTo(hdrRef.current,{opacity:0,y:40},{opacity:1,y:0,duration:1.4,ease:'power4.out',
-        scrollTrigger:{trigger:hdrRef.current,start:'top 88%',toggleActions:'play none none reverse'}});
-    },secRef);
-    return()=>ctx.revert();
-  },[]);
+  // hdrRef animates via CSS keyframe (no GSAP scrollTrigger = no pin conflict)
 
   return(
     <section ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-achievements"
@@ -861,7 +854,8 @@ export default function AchievementsSection() {
         }}/>
 
         {/* Minimal corner label */}
-        <div ref={hdrRef} style={{position:'absolute',top:'2rem',left:'4vw',zIndex:30,pointerEvents:'none',display:'flex',alignItems:'center',gap:'1rem'}}>
+        <div ref={hdrRef} style={{position:'absolute',top:'2rem',left:'4vw',zIndex:30,pointerEvents:'none',display:'flex',alignItems:'center',gap:'1rem',
+          animation:'hdrFadeIn 1.2s ease forwards', opacity:0}}>
           <div style={{width:'2rem',height:'1px',background:'rgba(255,255,255,0.18)'}}/>
           <span style={{fontFamily:'monospace',color:'rgba(255,255,255,0.28)',fontSize:'0.6rem',textTransform:'uppercase',letterSpacing:'0.4em',fontWeight:500}}>Achievements</span>
         </div>
@@ -943,6 +937,7 @@ export default function AchievementsSection() {
       <style>{`
         @keyframes achIn{from{opacity:0;transform:scale(0.93) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
         @keyframes scanBar{0%,100%{opacity:0.4;transform:scaleX(0.5)}50%{opacity:1;transform:scaleX(1)}}
+        @keyframes hdrFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
     </section>
   );
