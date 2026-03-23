@@ -51,13 +51,6 @@ canvas {
 /* NOTE: do NOT add will-change or transform to sticky elements —
    Chrome treats composited sticky as positioned, breaking stickiness */
 
-/* Section perf: style containment only — layout containment breaks
-   sticky+scroll calculations (getBoundingClientRect) in ProjectsSection */
-#section-achievements,
-#section-certifications,
-#section-contact {
-  contain: style;
-}
 
 /* ─── Scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
@@ -67,7 +60,7 @@ canvas {
 /* ─── Section base ──────────────────────────────────────────────── */
 section {
   width: 100%;
-  contain: layout style; /* prevent layout thrash across sections */
+  /* NOTE: do NOT use contain:layout — it breaks position:sticky inside sections */
 }
 
 /* ─── Skills section responsive ─────────────────────────────────── */

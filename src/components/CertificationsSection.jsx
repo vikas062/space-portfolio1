@@ -393,6 +393,7 @@ export default function CertificationsSection() {
       const rect = secRef.current?.getBoundingClientRect();
       if (!rect) return;
       const total = secRef.current.offsetHeight - window.innerHeight;
+      if (total <= 0) return;
       scrollY.current = Math.min(Math.max(0, -rect.top) / total, 1);
     };
     window.addEventListener('scroll', fn, { passive: true });
