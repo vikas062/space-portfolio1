@@ -16,6 +16,7 @@
 
 html {
   scroll-behavior: auto; /* GSAP controls scrolling */
+  overflow-x: hidden; /* prevent horizontal scroll on iOS too */
 }
 
 body {
@@ -53,15 +54,14 @@ canvas {
   transform: translateZ(0);
 }
 
-/* Off-screen sections: skip paint until visible (huge repaint savings) */
+/* Off-screen sections: GPU compositing only, no content-visibility
+   (content-visibility:auto breaks sticky scroll on mobile) */
 #section-skills,
 #section-projects,
 #section-achievements,
 #section-certifications,
 #section-contact {
-  content-visibility: auto;
-  /* contain-intrinsic-size prevents layout shift on first paint */
-  contain-intrinsic-size: 0 100vh;
+  contain: layout style;  /* prevent layout thrash, safe for sticky */
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────── */
