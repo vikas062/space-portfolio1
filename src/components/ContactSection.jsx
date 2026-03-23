@@ -7,79 +7,51 @@ gsap.registerPlugin(ScrollTrigger);
 /* ─── Load fonts ─── */
 if (typeof document !== 'undefined' && !document.getElementById('contact-font')) {
   const l = document.createElement('link'); l.id = 'contact-font'; l.rel = 'stylesheet';
-  l.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&family=Inter:wght@300;400&display=swap';
+  l.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@200;300;400;600;700&family=JetBrains+Mono:wght@300;400&display=swap';
   document.head.appendChild(l);
 }
 
 /* ─── Contact data ─── */
 const CONTACTS = [
-  { id:1, label:'LinkedIn',   value:'vikassingh62',             href:'https://www.linkedin.com/in/vikassingh62',  sym:'in' },
-  { id:2, label:'GitHub',     value:'vikas062',                 href:'https://github.com/vikas062',               sym:'gh' },
-  { id:3, label:'Email',      value:'vikassinghgkp6@gmail.com', href:'mailto:vikassinghgkp6@gmail.com',           sym:'@'  },
-  { id:5, label:'Instagram',  value:'vikas_singh_.62',          href:'https://instagram.com/vikas_singh_.62',     sym:'ig' },
-  { id:6, label:'Reddit',     value:'vikas_singh_.62',          href:'https://reddit.com/user/vikas_singh_.62',   sym:'r/' },
+  { id:1, label:'LinkedIn',  value:'vikassingh62',             href:'https://www.linkedin.com/in/vikassingh62',  sym:'↗' },
+  { id:2, label:'GitHub',    value:'vikas062',                 href:'https://github.com/vikas062',               sym:'↗' },
+  { id:3, label:'Email',     value:'vikassinghgkp6@gmail.com', href:'mailto:vikassinghgkp6@gmail.com',           sym:'↗' },
+  { id:5, label:'Instagram', value:'vikas_singh_.62',          href:'https://instagram.com/vikas_singh_.62',     sym:'↗' },
 ];
 
-/* ─── Contact Card ─── */
-function ContactCard({ contact }) {
-  const [hovered, setHovered] = useState(false);
+/* ─── Hover link ─── */
+function SocialLink({ contact }) {
+  const [hov, setHov] = useState(false);
   return (
     <a
       href={contact.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="contact-card"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       style={{
-        display: 'flex', alignItems: 'center', gap: '1.4rem',
-        padding: '1.4rem 1.8rem',
-        background: hovered ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.03)',
-        border: `1px solid ${hovered ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.09)'}`,
-        borderRadius: 6,
-        textDecoration: 'none',
-        transition: 'all 0.22s ease',
-        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        cursor: 'pointer',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        display:'flex', flexDirection:'column', gap:'0.22rem',
+        textDecoration:'none', cursor:'pointer', flex: 1,
+        padding: '1.1rem 1.4rem',
+        transition:'background 0.2s',
+        background: hov ? 'rgba(255,255,255,0.04)' : 'transparent',
+        borderRadius: 4,
       }}
     >
-      {/* Symbol */}
       <span style={{
-        fontFamily: "'JetBrains Mono',monospace",
-        fontSize: '.78rem', fontWeight: 400,
-        color: hovered ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.6)',
-        minWidth: 28, textAlign: 'center',
-        transition: 'color .22s',
-      }}>{contact.sym}</span>
-
-      {/* Divider */}
-      <div style={{ width: 1, height: 32, background: hovered ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.08)', flexShrink: 0 }}/>
-
-      {/* Label + Value */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <div style={{
-          fontFamily: "'Space Grotesk',sans-serif",
-          fontSize: '.48rem', fontWeight: 500, letterSpacing: '.22em', textTransform: 'uppercase',
-          color: 'rgba(255,255,255,.7)', marginBottom: '.3rem',
-        }}>{contact.label}</div>
-        <div style={{
-          fontFamily: "'JetBrains Mono',monospace",
-          fontSize: '.72rem', fontWeight: 300,
-          color: hovered ? '#fff' : 'rgba(255,255,255,.85)',
-          transition: 'color .22s',
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>{contact.value}</div>
-      </div>
-
-      {/* Arrow */}
+        fontFamily:"'JetBrains Mono',monospace",
+        fontSize:'.42rem', fontWeight:300, letterSpacing:'.35em',
+        textTransform:'uppercase',
+        color: hov ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.28)',
+        transition:'color 0.2s',
+      }}>{contact.label}</span>
       <span style={{
-        fontFamily: "'Space Grotesk'",
-        fontSize: '.7rem', color: hovered ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.15)',
-        transition: 'all .22s', transform: hovered ? 'translate(2px,-2px)' : 'translate(0,0)',
-        flexShrink: 0,
-      }}>↗</span>
+        fontFamily:"'Space Grotesk',sans-serif",
+        fontSize:'.75rem', fontWeight:400,
+        color: hov ? '#fff' : 'rgba(255,255,255,0.65)',
+        transition:'color 0.2s',
+        letterSpacing:'-.01em',
+      }}>{contact.value}</span>
     </a>
   );
 }
@@ -87,33 +59,21 @@ function ContactCard({ contact }) {
 /* ─── Main ─── */
 export default function ContactSection() {
   const secRef   = useRef();
-  const titleRef = useRef();
-  const subRef   = useRef();
-  const gridRef  = useRef();
+  const headRef  = useRef();
+  const barRef   = useRef();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(titleRef.current,
-        { opacity: 0, y: 60, filter: 'blur(12px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power4.out',
-          scrollTrigger: { trigger: titleRef.current, start: 'top 85%', toggleActions: 'play none none reverse' }
-        }
+      gsap.fromTo(headRef.current,
+        { opacity:0, y:50, filter:'blur(14px)' },
+        { opacity:1, y:0, filter:'blur(0px)', duration:1.5, ease:'power4.out',
+          scrollTrigger:{ trigger:headRef.current, start:'top 85%', toggleActions:'play none none reverse' } }
       );
-      gsap.fromTo(subRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', delay: 0.2,
-          scrollTrigger: { trigger: subRef.current, start: 'top 85%', toggleActions: 'play none none reverse' }
-        }
+      gsap.fromTo(barRef.current,
+        { opacity:0, y:30 },
+        { opacity:1, y:0, duration:1.1, ease:'power3.out', delay:0.3,
+          scrollTrigger:{ trigger:barRef.current, start:'top 92%', toggleActions:'play none none reverse' } }
       );
-      const cards = gridRef.current?.querySelectorAll('.contact-card');
-      if (cards) {
-        gsap.fromTo(cards,
-          { opacity: 0, y: 50, scale: 0.92 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'power3.out', stagger: 0.1,
-            scrollTrigger: { trigger: gridRef.current, start: 'top 82%', toggleActions: 'play none none reverse' }
-          }
-        );
-      }
     }, secRef);
     return () => ctx.revert();
   }, []);
@@ -123,103 +83,123 @@ export default function ContactSection() {
       ref={secRef}
       id="section-contact"
       style={{
-        position: 'relative', width: '100vw', minHeight: '100vh',
-        overflow: 'hidden',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '10rem 4vw 6rem',
+        position:'relative', width:'100vw', height:'100vh',
+        overflow:'hidden', background:'#000',
+        display:'flex', flexDirection:'column',
+        alignItems:'center', justifyContent:'center',
       }}
     >
-      {/* ── Full-bleed grayscale photo background ── */}
+      {/* ── Full-bleed grayscale photo ── */}
       <img
         src="/profile.jpg"
         alt=""
         aria-hidden="true"
         style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center 20%',
-          filter: 'grayscale(1)',
-          opacity: 0.38,
-          pointerEvents: 'none',
-          userSelect: 'none',
+          position:'absolute', inset:0,
+          width:'100%', height:'100%',
+          objectFit:'cover',
+          objectPosition:'center 18%',
+          filter:'grayscale(1) contrast(1.05)',
+          opacity:0.52,
+          pointerEvents:'none',
+          userSelect:'none',
         }}
       />
 
-      {/* Dark overlay — ensures text legibility */}
+      {/* Gradient — heavy at bottom so bar reads clearly */}
       <div style={{
-        position: 'absolute', inset: 0,
-        background: 'linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.75) 80%, #000 100%)',
-        pointerEvents: 'none',
+        position:'absolute', inset:0,
+        background:'linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.18) 40%, rgba(0,0,0,0.72) 72%, #000 100%)',
+        pointerEvents:'none',
       }}/>
 
       {/* Top fade from previous section */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '18vh',
-        background: 'linear-gradient(to bottom, #00000a 0%, transparent 100%)',
-        pointerEvents: 'none', zIndex: 5,
+        position:'absolute', top:0, left:0, right:0, height:'16vh',
+        background:'linear-gradient(to bottom,#00000a,transparent)',
+        pointerEvents:'none', zIndex:3,
       }}/>
 
-      {/* Content */}
-      <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 960, margin: '0 auto' }}>
+      {/* ── Center headline ── */}
+      <div ref={headRef} style={{
+        position:'relative', zIndex:5,
+        textAlign:'center',
+        flex:1,
+        display:'flex', flexDirection:'column',
+        alignItems:'center', justifyContent:'center',
+        paddingTop:'6vh',
+      }}>
+        <span style={{
+          fontFamily:"'JetBrains Mono',monospace",
+          fontSize:'.48rem', fontWeight:300,
+          color:'rgba(255,255,255,0.42)', letterSpacing:'.45em',
+          textTransform:'uppercase', display:'block', marginBottom:'1.4rem',
+        }}>Let's work together</span>
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'.8rem', marginBottom:'1.8rem' }}>
-            <div style={{ width:'2rem', height:1, background:'rgba(255,255,255,.18)' }}/>
-            <span style={{
-              fontFamily:"'JetBrains Mono',monospace", fontSize:'.5rem', fontWeight:300,
-              color:'rgba(255,255,255,.88)', letterSpacing:'.4em', textTransform:'uppercase',
-            }}>Contact</span>
-            <div style={{ width:'2rem', height:1, background:'rgba(255,255,255,.18)' }}/>
-          </div>
-
-          <h2 ref={titleRef} style={{
-            fontFamily:"'Space Grotesk',sans-serif",
-            fontSize:'clamp(3rem,7vw,6rem)',
-            fontWeight:700, letterSpacing:'-.05em', color:'#fff',
-            lineHeight:.88, margin:'0 0 1.4rem',
-          }}>
-            <span style={{ fontWeight:200, color:'rgba(255,255,255,.75)' }}>Let's&nbsp;</span>Connect
-          </h2>
-
-          <p ref={subRef} style={{
-            fontFamily:"'Inter',sans-serif",
-            fontSize:'clamp(.85rem,1.2vw,1rem)', fontWeight:300,
-            color:'rgba(255,255,255,.75)', lineHeight:1.8,
-            maxWidth:360, margin:'0 auto',
-            letterSpacing:'.01em',
-          }}>
-            Open to collaborations, freelance work, and interesting conversations.
-          </p>
-        </div>
-
-        {/* Contact grid */}
-        <div ref={gridRef} style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '.8rem',
+        <h2 style={{
+          fontFamily:"'Space Grotesk',sans-serif",
+          fontSize:'clamp(3.2rem,8vw,7rem)',
+          fontWeight:700, letterSpacing:'-.055em',
+          color:'#fff', lineHeight:.9, margin:0,
         }}>
-          {CONTACTS.map((c, i) => <ContactCard key={c.id} contact={c} index={i} />)}
-        </div>
+          <span style={{ fontWeight:200, color:'rgba(255,255,255,0.7)' }}>Let's&nbsp;</span>Connect
+        </h2>
 
-        {/* Footer */}
-        <div style={{ marginTop:'4rem', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:'.8rem' }}>
-          <div style={{ width:1, height:40, background:'linear-gradient(to bottom,rgba(255,255,255,.15),transparent)' }}/>
-          <span style={{
-            fontFamily:"'JetBrains Mono',monospace", fontSize:'.42rem', fontWeight:300,
-            color:'rgba(255,255,255,.18)', letterSpacing:'.3em', textTransform:'uppercase',
-          }}>Vikas Singh · {new Date().getFullYear()}</span>
-        </div>
+        <p style={{
+          marginTop:'1.6rem',
+          fontFamily:"'Space Grotesk',sans-serif",
+          fontSize:'clamp(.82rem,1.1vw,.95rem)', fontWeight:300,
+          color:'rgba(255,255,255,0.5)', letterSpacing:'.01em',
+          lineHeight:1.7,
+        }}>
+          Open to collaborations, freelance &amp; interesting conversations.
+        </p>
       </div>
 
-      {/* Bottom vignette */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
-        background: 'linear-gradient(to bottom, transparent, #000)',
-        pointerEvents: 'none', zIndex: 5,
-      }}/>
+      {/* ── Bottom contact strip ── */}
+      <div ref={barRef} style={{
+        position:'relative', zIndex:5,
+        width:'100%',
+        borderTop:'1px solid rgba(255,255,255,0.08)',
+        background:'rgba(0,0,0,0.45)',
+        backdropFilter:'blur(18px)',
+        WebkitBackdropFilter:'blur(18px)',
+      }}>
+        <div style={{
+          display:'flex', alignItems:'stretch',
+          maxWidth:1100, margin:'0 auto',
+          padding:'0 4vw',
+        }}>
+          {CONTACTS.map((c, i) => (
+            <React.Fragment key={c.id}>
+              {i > 0 && (
+                <div style={{ width:1, background:'rgba(255,255,255,0.07)', flexShrink:0, margin:'1rem 0' }}/>
+              )}
+              <SocialLink contact={c} />
+            </React.Fragment>
+          ))}
+
+          {/* Right — signature */}
+          <div style={{
+            width:1, background:'rgba(255,255,255,0.07)', flexShrink:0, margin:'1rem 0'
+          }}/>
+          <div style={{
+            display:'flex', flexDirection:'column', justifyContent:'center',
+            padding:'1rem 1.4rem', gap:'0.2rem',
+          }}>
+            <span style={{
+              fontFamily:"'JetBrains Mono',monospace",
+              fontSize:'.42rem', color:'rgba(255,255,255,0.2)',
+              letterSpacing:'.3em', textTransform:'uppercase',
+            }}>Vikas Singh</span>
+            <span style={{
+              fontFamily:"'JetBrains Mono',monospace",
+              fontSize:'.4rem', color:'rgba(255,255,255,0.14)',
+              letterSpacing:'.2em',
+            }}>© {new Date().getFullYear()}</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
