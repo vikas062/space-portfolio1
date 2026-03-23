@@ -349,15 +349,23 @@ function ContactCard({ contact, index }) {
 
 /* ─── Main ─── */
 export default function ContactSection() {
-  const secRef = useRef();
-  const titleRef = useRef();
-  const subRef = useRef();
-  const gridRef = useRef();
+  const secRef    = useRef();
+  const titleRef   = useRef();
+  const subRef     = useRef();
+  const gridRef    = useRef();
+  const photoRef   = useRef();
   
   const { ref: viewRef, inView } = useInView({ rootMargin: '0px' });
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Photo entrance
+      gsap.fromTo(photoRef.current,
+        { opacity: 0, scale: 0.88, filter: 'blur(6px)' },
+        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out',
+          scrollTrigger: { trigger: photoRef.current, start: 'top 88%', toggleActions: 'play none none reverse' }
+        }
+      );
       // Title entrance
       gsap.fromTo(titleRef.current,
         { opacity: 0, y: 60, filter: 'blur(12px)' },
@@ -427,7 +435,24 @@ export default function ContactSection() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
 
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'.8rem', marginBottom:'1.8rem' }}>
+          {/* Profile Photo */}
+        <div ref={photoRef} style={{ textAlign:'center', marginBottom:'2.2rem' }}>
+          <img
+            src="/profile.jpg"
+            alt="Vikas Singh"
+            style={{
+              width: 108, height: 108,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              filter: 'grayscale(1) brightness(0.92)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+        </div>
+
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'.8rem', marginBottom:'1.8rem' }}>
             <div style={{ width:'2rem', height:1, background:'rgba(255,255,255,.12)' }}/>
             <span style={{
               fontFamily:"'JetBrains Mono',monospace", fontSize:'.5rem', fontWeight:300,
