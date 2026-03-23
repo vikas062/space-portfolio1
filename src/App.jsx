@@ -93,7 +93,7 @@ function App() {
   }, []);
 
   return (
-    <ReactLenis root ref={lenisRef} autoRaf={false} options={{ lerp: 0.05, duration: 1.2, smoothWheel: true }}>
+    <ReactLenis root ref={lenisRef} autoRaf={false} options={{ lerp: 0.1, duration: 1.0, smoothWheel: true, wheelMultiplier: 1.0, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) }}>
       <div className="app-container">
         <OverlayNav />
         <div style={{ position: 'relative' }}>

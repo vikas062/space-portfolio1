@@ -255,7 +255,7 @@ export default function ProjectsSection() {
       ScrollTrigger.create({
         trigger: inner,
         start: 'top top',
-        end: `+=${maxShift}`,
+        end: `+=${maxShift + window.innerHeight * 2}`,
         pin: true,
         scrub: true,
         anticipatePin: 1,
@@ -297,7 +297,7 @@ export default function ProjectsSection() {
 
         {/* WebGL bg */}
         <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false }} dpr={[1,1]}
-          frameloop={inView?'always':'never'}
+          frameloop="always"
           style={{ position:'absolute', inset:0, zIndex:0 }}>
           <BgScene project={active} />
         </Canvas>
