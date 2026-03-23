@@ -4,7 +4,10 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useInView } from '../hooks/useInView';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Projects ─── */
 const PROJECTS = [
@@ -243,20 +246,25 @@ export default function ProjectsSection() {
   const refs = [useRef(null), useRef(null)];
 
   useEffect(() => {
+    if (isMobile) return; // mobile uses vertical stack, no scroll trick
     const outer = outerRef.current, track = trackRef.current;
-    const onScroll = () => {
-      const rect  = outer.getBoundingClientRect();
-      const total = outer.offsetHeight - window.innerHeight;
-      const prog  = Math.min(Math.max(0,-rect.top)/total, 1);
-      progressRef.current = prog;
-      track.style.transform = `translateX(${-prog*(track.scrollWidth-window.innerWidth)}px)`;
-      const idx = Math.min(Math.floor(prog*PROJECTS.length), PROJECTS.length-1);
-      if (idx !== activeRef.current) { activeRef.current=idx; setActive(PROJECTS[idx]); }
-    };
-    window.addEventListener('scroll', onScroll, { passive:true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    const maxShift = (PROJECTS.length - 1) * window.innerWidth;
+
+    const trig = ScrollTrigger.create({
+      trigger: outer,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1.5,
+      onUpdate: (self) => {
+        const prog = self.progress;
+        track.style.transform = `translateX(${-prog * maxShift}px)`;
+        const idx = Math.min(Math.floor(prog * PROJECTS.length), PROJECTS.length - 1);
+        if (idx !== activeRef.current) { activeRef.current = idx; setActive(PROJECTS[idx]); }
+      },
+    });
+
+    return () => trig.kill();
+  }, [isMobile]);
 
   // Mobile: render as simple vertical stack — no horizontal sticky scroll
   if (isMobile) {
