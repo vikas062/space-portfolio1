@@ -8,6 +8,10 @@ import * as THREE from 'three';
 
 const CA_OFFSET = new Vector2(0.0004, 0.0004);
 import { useInView } from '../hooks/useInView';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* ─── GLSL volumetric nebula (same domain-warped shader as Achievements) ─── */
 const NebulaVert = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
@@ -384,30 +388,40 @@ function Modal({ cert, onClose }) {
 
 /* ── Main export ──────────────────────────────── */
 export default function CertificationsSection() {
-  const secRef = useRef(null); // Changed from outerRef to secRef
+  const secRef  = useRef(null);
+  const innerRef = useRef(null); // GSAP pin target
   const scrollY  = useRef(0);
   const [selected,setSelected] = useState(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  // GSAP ScrollTrigger pin (replaces CSS sticky + window.scroll listener)
   useEffect(() => {
-    const fn = () => {
-      const rect = secRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const total = secRef.current.offsetHeight - window.innerHeight;
-      if (total <= 0) return;
-      scrollY.current = Math.min(Math.max(0, -rect.top) / total, 1);
-    };
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
+    if (isMobile) return;
+    const inner = innerRef.current;
+    const pinDistance = window.innerHeight * 2.5;
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: inner,
+        start: 'top top',
+        end: `+=${pinDistance}`,
+        pin: true,
+        scrub: true,
+        anticipatePin: 1,
+        onUpdate: (self) => { scrollY.current = self.progress; },
+      });
+    }, secRef);
+    return () => ctx.revert();
+  }, [isMobile]);
 
   const { ref: viewRef, inView } = useInView({ rootMargin: '0px' });
 
   return (
     <>
-      <div ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-certifications"
-        style={{position:'relative',width:'100vw',height: window.innerWidth < 768 ? '100vh' : '350vh',backgroundColor:'#00000a'}}>
+      <div ref={(el) => { secRef.current = el; }} id="section-certifications"
+        style={{position:'relative',width:'100vw',background:'#00000a'}}>
 
-        <div style={{position:'sticky',top:0,width:'100vw',height:'100vh',overflow:'hidden'}}>
+        <div ref={(el) => { innerRef.current = el; viewRef.current = el; }}
+          style={{width:'100vw',height:'100vh',overflow:'hidden',position:'relative'}}>
 
           {/* Vignette */}
           <div style={{position:'absolute',inset:0,zIndex:2,pointerEvents:'none',

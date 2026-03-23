@@ -779,25 +779,33 @@ function Modal({ ach, onClose }) {
 /* ─── Main ─── */
 export default function AchievementsSection() {
   const secRef    = useRef();
-  const hdrRef    = useRef();
+  const innerRef   = useRef();   // pinned element for GSAP
+  const hdrRef     = useRef();
   const canvasWrapRef = useRef();
-  const scrollY   = useRef(0);                         // 0 → 1 section scroll progress
+  const scrollY    = useRef(0);
   const [selectedId, setSelectedId] = useState(null);
   const [canvasHovered, setCanvasHovered] = useState(false);
   const selectedAch = ACHIEVEMENTS.find(a => a.id === selectedId) || null;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // Track section scroll progress (same as CertificationsSection)
+  // GSAP ScrollTrigger pin (replaces CSS sticky + window.scroll)
   useEffect(() => {
-    const fn = () => {
-      const rect = secRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const total = secRef.current.offsetHeight - window.innerHeight;
-      if (total <= 0) return; // mobile: section = viewport height, no scroll range
-      scrollY.current = Math.min(Math.max(0, -rect.top) / total, 1);
-    };
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
+    if (isMobile) return; // mobile shows static 100vh view
+    const inner = innerRef.current;
+    const pinDistance = window.innerHeight * 2.5; // scroll distance while pinned = zoom range
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: inner,
+        start: 'top top',
+        end: `+=${pinDistance}`,
+        pin: true,
+        scrub: true,
+        anticipatePin: 1,
+        onUpdate: (self) => { scrollY.current = self.progress; },
+      });
+    }, secRef);
+    return () => ctx.revert();
+  }, [isMobile]);
 
   const { ref: viewRef, inView } = useInView({ rootMargin: '0px' });
 
@@ -830,12 +838,12 @@ export default function AchievementsSection() {
     return()=>ctx.revert();
   },[]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   return(
-    <section ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-achievements"
-      style={{position:'relative',width:'100vw',height: isMobile ? '100vh' : '350vh',background:'#00000a'}}>
+    <section ref={(el) => { secRef.current = el; }} id="section-achievements"
+      style={{position:'relative', width:'100vw', background:'#00000a'}}>
 
-      <div style={{position:'sticky',top:0,width:'100vw',height:'100vh',overflow:'hidden'}}>
+      <div ref={(el) => { innerRef.current = el; viewRef.current = el; }}
+        style={{width:'100vw', height:'100vh', overflow:'hidden', position:'relative'}}>
 
         {/* Top fade */}
         <div style={{
