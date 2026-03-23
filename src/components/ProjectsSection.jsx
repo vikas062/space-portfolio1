@@ -255,7 +255,7 @@ export default function ProjectsSection() {
       ScrollTrigger.create({
         trigger: inner,
         start: 'top top',
-        end: `+=${maxShift + window.innerHeight * 2}`,
+        end: `+=${maxShift + window.innerHeight * 5}`,
         pin: true,
         scrub: true,
         anticipatePin: 1,
