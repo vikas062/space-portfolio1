@@ -799,8 +799,7 @@ export default function AchievementsSection() {
         start: 'top top',
         end: `+=${pinDistance}`,
         pin: true,
-        scrub: true,
-        anticipatePin: 1,
+        pinSpacing: true,
         onUpdate: (self) => { scrollY.current = self.progress; },
       });
     }, secRef);

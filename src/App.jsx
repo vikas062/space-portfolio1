@@ -86,10 +86,20 @@ function App() {
   const lenisRef = useRef(null);
 
   useEffect(() => {
-    function update(time) { lenisRef.current?.lenis?.raf(time * 1000); }
+    function update(time) {
+      const lenis = lenisRef.current?.lenis;
+      if (!lenis) return;
+      lenis.raf(time * 1000);
+    }
     gsap.ticker.add(update);
-    gsap.ticker.lagSmoothing(0);
-    return () => { gsap.ticker.remove(update); };
+    gsap.ticker.lagSmoothing(500, 33); // restore lag protection
+    // Keep ScrollTrigger in sync with Lenis scroll position
+    const onScroll = () => ScrollTrigger.update();
+    lenisRef.current?.lenis?.on('scroll', onScroll);
+    return () => {
+      gsap.ticker.remove(update);
+      lenisRef.current?.lenis?.off('scroll', onScroll);
+    };
   }, []);
 
   return (
