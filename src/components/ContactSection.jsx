@@ -26,9 +26,11 @@ function Handle({ c }) {
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
         display:'flex', flexDirection:'column', gap:'0.25rem',
-        textDecoration:'none', flex:1, minWidth:0,
+        textDecoration:'none',
+        flex:'1 1 150px', minWidth:0,
         padding:'1.2rem 1.5rem',
         background: hov ? 'rgba(255,255,255,0.06)' : 'transparent',
+        borderRight:'1px solid rgba(255,255,255,0.06)',
         transition:'background .18s',
       }}
     >
@@ -106,6 +108,7 @@ export default function ContactSection() {
       <div ref={panelRef} style={{
         position:'absolute', bottom:0, left:0, right:0, zIndex:10,
         borderTop:'1px solid rgba(255,255,255,0.1)',
+        overflow:'hidden',
       }}>
 
         {/* Heading row */}
@@ -133,19 +136,20 @@ export default function ContactSection() {
           </p>
         </div>
 
-        {/* Handles row */}
-        <div style={{ display:'flex', alignItems:'stretch' }}>
-          {CONTACTS.map((c, i) => (
-            <React.Fragment key={c.id}>
-              {i > 0 && <div style={{ width:1, background:'rgba(255,255,255,0.06)', margin:'0.6rem 0', flexShrink:0 }}/>}
-              <Handle c={c} />
-            </React.Fragment>
+        {/* Handles row — wraps on small screens */}
+        <div style={{
+          display:'flex', alignItems:'stretch',
+          flexWrap:'wrap',
+          overflow:'hidden',
+        }}>
+          {CONTACTS.map((c) => (
+            <Handle key={c.id} c={c} />
           ))}
           {/* Copyright */}
-          <div style={{ width:1, background:'rgba(255,255,255,0.06)', margin:'0.6rem 0', flexShrink:0 }}/>
           <div style={{
             display:'flex', alignItems:'center',
             padding:'1.2rem 1.6rem', flexShrink:0,
+            borderLeft:'1px solid rgba(255,255,255,0.06)',
           }}>
             <span style={{
               fontFamily:"'JetBrains Mono',monospace",

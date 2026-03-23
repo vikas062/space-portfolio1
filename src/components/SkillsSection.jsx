@@ -367,6 +367,16 @@ export default function SkillsSection() {
         ))}
       </div>
 
+      {/* Left shield — gradient covers text area, hides 3D Html badges that drift left */}
+      {!isMobile && (
+        <div style={{
+          position:'absolute', left:0, top:0, bottom:0,
+          width:'46%',
+          background:'linear-gradient(to right, #050505 60%, transparent 100%)',
+          zIndex:8, pointerEvents:'none',
+        }}/>
+      )}
+
       {/* ── 3D Canvas Panel ─────────────────────────── */}
       <div style={{
         position: isMobile ? 'relative' : 'absolute',
@@ -377,6 +387,7 @@ export default function SkillsSection() {
         minHeight: isMobile ? '300px' : 'auto',
         zIndex: 5,
         pointerEvents: 'auto',
+        overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
           {active && (
