@@ -413,14 +413,14 @@ export default function CertificationsSection() {
     return () => ctx.revert();
   }, [isMobile]);
 
-  const { ref: viewRef, inView } = useInView({ rootMargin: '0px' });
+  const { ref: viewRef, inView } = useInView({ rootMargin: '300px 0px' });
 
   return (
     <>
-      <div ref={(el) => { secRef.current = el; }} id="section-certifications"
+      <div ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-certifications"
         style={{position:'relative',width:'100vw',background:'#00000a'}}>
 
-        <div ref={(el) => { innerRef.current = el; viewRef.current = el; }}
+        <div ref={innerRef}
           style={{width:'100vw',height:'100vh',overflow:'hidden',position:'relative'}}>
 
           {/* Vignette */}

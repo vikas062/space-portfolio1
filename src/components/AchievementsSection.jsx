@@ -807,7 +807,7 @@ export default function AchievementsSection() {
     return () => ctx.revert();
   }, [isMobile]);
 
-  const { ref: viewRef, inView } = useInView({ rootMargin: '0px' });
+  const { ref: viewRef, inView } = useInView({ rootMargin: '300px 0px' });
 
   // Forward wheel events from canvas wrapper to page so scrolling works on canvas
   useEffect(() => {
@@ -839,10 +839,10 @@ export default function AchievementsSection() {
   },[]);
 
   return(
-    <section ref={(el) => { secRef.current = el; }} id="section-achievements"
+    <section ref={(el) => { secRef.current = el; viewRef.current = el; }} id="section-achievements"
       style={{position:'relative', width:'100vw', background:'#00000a'}}>
 
-      <div ref={(el) => { innerRef.current = el; viewRef.current = el; }}
+      <div ref={innerRef}
         style={{width:'100vw', height:'100vh', overflow:'hidden', position:'relative'}}>
 
         {/* Top fade */}
