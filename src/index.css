@@ -48,10 +48,10 @@ canvas {
 }
 
 /* ─── Compositor layer hints ─────────────────────────────────────── */
-/* Sticky inner frames: pre-promote to GPU layer                      */
+/* Sticky inner frames: will-change only — do NOT add transform here,
+   as any CSS transform on sticky breaks the sticky positioning spec */
 [style*="position:sticky"], [style*="position: sticky"] {
   will-change: transform;
-  transform: translateZ(0);
 }
 
 /* Section perf: style containment only — layout containment breaks
