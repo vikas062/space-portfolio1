@@ -48,11 +48,8 @@ canvas {
 }
 
 /* ─── Compositor layer hints ─────────────────────────────────────── */
-/* Sticky inner frames: will-change only — do NOT add transform here,
-   as any CSS transform on sticky breaks the sticky positioning spec */
-[style*="position:sticky"], [style*="position: sticky"] {
-  will-change: transform;
-}
+/* NOTE: do NOT add will-change or transform to sticky elements —
+   Chrome treats composited sticky as positioned, breaking stickiness */
 
 /* Section perf: style containment only — layout containment breaks
    sticky+scroll calculations (getBoundingClientRect) in ProjectsSection */

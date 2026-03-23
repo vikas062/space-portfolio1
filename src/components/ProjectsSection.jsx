@@ -236,34 +236,38 @@ function Card({ project, cardRef }) {
 /* ─── Main ─── */
 export default function ProjectsSection() {
   const outerRef    = useRef(null);
+  const innerRef    = useRef(null);
   const trackRef    = useRef(null);
   const progressRef = useRef(0);
   const activeRef   = useRef(0);
-  const { ref:viewRef, inView } = useInView({ rootMargin:'0px' });
+  const { ref:viewRef, inView } = useInView({ rootMargin:'200px' });
   const [active, setActive] = React.useState(PROJECTS[0]);
   const isMobile = window.innerWidth < 768;
 
   const refs = [useRef(null), useRef(null)];
 
   useEffect(() => {
-    if (isMobile) return; // mobile uses vertical stack, no scroll trick
-    const outer = outerRef.current, track = trackRef.current;
+    if (isMobile) return;
+    const inner = innerRef.current, track = trackRef.current;
     const maxShift = (PROJECTS.length - 1) * window.innerWidth;
 
-    const trig = ScrollTrigger.create({
-      trigger: outer,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1.5,
-      onUpdate: (self) => {
-        const prog = self.progress;
-        track.style.transform = `translateX(${-prog * maxShift}px)`;
-        const idx = Math.min(Math.floor(prog * PROJECTS.length), PROJECTS.length - 1);
-        if (idx !== activeRef.current) { activeRef.current = idx; setActive(PROJECTS[idx]); }
-      },
-    });
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: inner,
+        start: 'top top',
+        end: `+=${maxShift}`,
+        pin: true,
+        scrub: true,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          track.style.transform = `translateX(${-self.progress * maxShift}px)`;
+          const idx = Math.min(Math.floor(self.progress * PROJECTS.length), PROJECTS.length - 1);
+          if (idx !== activeRef.current) { activeRef.current = idx; setActive(PROJECTS[idx]); }
+        },
+      });
+    }, outerRef);
 
-    return () => trig.kill();
+    return () => ctx.revert();
   }, [isMobile]);
 
   // Mobile: render as simple vertical stack — no horizontal sticky scroll
@@ -287,8 +291,9 @@ export default function ProjectsSection() {
   return (
     <div ref={(el)=>{ outerRef.current=el; viewRef.current=el; }}
       id="section-projects"
-      style={{ position:'relative', width:'100vw', height:`${PROJECTS.length*100}vh`, background:'#040410' }}>
-      <div style={{ position:'sticky', top:0, width:'100vw', height:'100vh', overflow:'hidden' }}>
+      style={{ position:'relative', width:'100vw', background:'#040410' }}>
+      {/* No height set — GSAP pin creates scroll space automatically */}
+      <div ref={innerRef} style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative' }}>
 
         {/* WebGL bg */}
         <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false }} dpr={[1,1]}
