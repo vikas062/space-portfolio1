@@ -429,11 +429,11 @@ export default function SkillsSection() {
                 opacity: 0.85, mixBlendMode: 'screen',
                 filter: 'blur(40px)', pointerEvents: 'none', zIndex: 0
               }} />
-              <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: isMobile ? 'none' : 'auto' }}>
+              <div style={{ position: 'absolute', inset: 0, zIndex: 1, touchAction: 'pan-y' }}>
                 <Canvas 
                   camera={{ position: [0, 0, 8], fov: 50 }}
                   dpr={[1, 1]}
-                  frameloop={inView ? 'always' : 'demand'}
+                  frameloop={inView ? 'always' : 'never'}
                   gl={{ antialias: false, powerPreference: 'high-performance' }}
                 >
                   <Scene domain={active} />

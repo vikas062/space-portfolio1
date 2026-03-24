@@ -460,13 +460,12 @@ export default function CertificationsSection() {
             ))}
           </div>
 
-          {/* Canvas — desktop only. Mobile shows CSS space background, no WebGL */}
-          {!isMobile ? <>
+          <div style={{position:'absolute',inset:0,zIndex:0,touchAction:'pan-y'}}>
           <Canvas 
             camera={{position:[0,7,18],fov:52}} 
             gl={{antialias:false, alpha:false, toneMappingExposure:1.4, powerPreference:'high-performance'}}
             dpr={[1, 1]}
-            frameloop={canvasVisible ? 'always' : 'demand'}
+            frameloop={canvasVisible ? 'always' : 'never'}
             onCreated={({gl}) => gl.setClearColor(0x00000a, 1)}
             style={{position:'absolute',inset:0}}
           >
@@ -521,9 +520,7 @@ export default function CertificationsSection() {
               <Vignette eskil={false} offset={0.1} darkness={0.9} />
             </EffectComposer>
           </Canvas>
-          </> : <div style={{position:'absolute',inset:0,
-            background:'radial-gradient(ellipse 120% 80% at 50% 60%, #1a0840 0%, #050028 40%, #00000a 100%)',
-            pointerEvents:'none'}}/>}
+          </div>
 
         </div>
         {/* Bottom fade — bleeds seamlessly into AchievementsSection (same dark space) */}

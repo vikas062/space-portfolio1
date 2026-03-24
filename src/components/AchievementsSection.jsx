@@ -879,14 +879,12 @@ export default function AchievementsSection() {
           ))}
         </div>
 
-        <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0,
-          pointerEvents: isMobile ? 'none' : 'auto',
-          background: isMobile ? 'radial-gradient(ellipse 120% 80% at 50% 40%, #1a0840 0%, #050028 40%, #00000a 100%)' : undefined}}>
-        {!isMobile && <Canvas
+        <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0,touchAction:'pan-y'}}>
+        <Canvas
           camera={{position:[0,5,55],fov:52}}
           gl={{antialias:false, alpha:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
           dpr={[1, 1]}
-          frameloop={canvasVisible ? 'always' : 'demand'}
+          frameloop={canvasVisible ? 'always' : 'never'}
           onCreated={({gl}) => gl.setClearColor(0x00000a, 1)}
           style={{position:'absolute',inset:0}}
         >
@@ -916,7 +914,7 @@ export default function AchievementsSection() {
             <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0}/>
             <Vignette eskil={false} offset={0.1} darkness={0.9}/>
           </EffectComposer>
-        </Canvas>}
+        </Canvas>
         </div>
       </div>
 
