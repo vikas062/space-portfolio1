@@ -305,11 +305,11 @@ export default function ProjectsSection() {
       <div ref={innerRef} style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative' }}>
 
         {/* WebGL bg */}
-        {canvasVisible && <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false, powerPreference:'high-performance' }} dpr={[1,1]}
-          frameloop="always"
+        <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false, powerPreference:'high-performance' }} dpr={[1,1]}
+          frameloop={canvasVisible ? 'always' : 'demand'}
           style={{ position:'absolute', inset:0, zIndex:0 }}>
           <BgScene project={active} />
-        </Canvas>}
+        </Canvas>
 
         {/* Subtle radial darkening at edges so cards pop */}
         <div style={{ position:'absolute', inset:0, zIndex:1, pointerEvents:'none',

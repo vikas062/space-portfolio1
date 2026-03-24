@@ -465,11 +465,11 @@ export default function CertificationsSection() {
             - gl antialias={false}: EffectComposer (Bloom) works infinitely faster without multisampling.
             - dpr={[1, 1]}: Caps pixel ratio to 1x to save fragment shader fill-rate on high-density displays (retina).
           /*/}
-          {canvasVisible && <Canvas 
+          <Canvas 
             camera={{position:[0,7,18],fov:52}} 
             gl={{antialias:false, alpha:false, toneMappingExposure:1.4, powerPreference:'high-performance'}}
             dpr={[1, 1]}
-            frameloop="always"
+            frameloop={canvasVisible ? 'always' : 'demand'}
             onCreated={({gl}) => gl.setClearColor(0x00000a, 1)}
             style={{position:'absolute',inset:0}}
           >
@@ -523,7 +523,7 @@ export default function CertificationsSection() {
               <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0} />
               <Vignette eskil={false} offset={0.1} darkness={0.9} />
             </EffectComposer>
-          </Canvas>}
+          </Canvas>
 
         </div>
         {/* Bottom fade — bleeds seamlessly into AchievementsSection (same dark space) */}

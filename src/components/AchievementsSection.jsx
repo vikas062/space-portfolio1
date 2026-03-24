@@ -191,8 +191,8 @@ function Stars() {
       return g;
     };
     return [
-      mk(5000, 80, 180, ['#ffffff','#e8f0ff','#ffe8d0','#ffc8a0','#d0e8ff','#c8d8ff']), // bright varied
-      mk(14000, 50, 350, ['#8899cc','#aab8dd','#bb9977','#9988cc']),                   // dim background
+      mk(4000, 80, 180, ['#ffffff','#e8f0ff','#ffe8d0','#ffc8a0','#d0e8ff','#c8d8ff']), // bright varied
+      mk(7000, 50, 350, ['#8899cc','#aab8dd','#bb9977','#9988cc']),                   // dim background
     ];
   }, []);
   useFrame(({ clock }) => { if (ref.current) ref.current.rotation.y = clock.getElapsedTime() * 0.0006; });
@@ -880,12 +880,11 @@ export default function AchievementsSection() {
         </div>
 
         <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0}}>
-        {canvasVisible && (
         <Canvas
           camera={{position:[0,5,55],fov:52}}
           gl={{antialias:false, alpha:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
           dpr={[1, 1]}
-          frameloop="always"
+          frameloop={canvasVisible ? 'always' : 'demand'}
           onCreated={({gl}) => gl.setClearColor(0x00000a, 1)}
           style={{position:'absolute',inset:0}}
         >
@@ -899,8 +898,6 @@ export default function AchievementsSection() {
           <Nebula position={[42,-10,-75]} scale={70} color="#00bbcc" timeOffset={3} rotation={[-0.2,0.5,-0.1]}/>
           <Nebula position={[8,32,-72]} scale={58} color="#ff6600" timeOffset={7} rotation={[0.1,-0.2,0.4]}/>
           <Nebula position={[-18,-22,-60]} scale={48} color="#6622dd" timeOffset={2} rotation={[0.5,0.3,-0.2]}/>
-          <Nebula position={[30,20,-80]} scale={65} color="#ff2255" timeOffset={5} rotation={[-0.1,0.2,0.3]}/>
-          <Nebula position={[-48,-8,-70]} scale={55} color="#0044ff" timeOffset={9} rotation={[0.2,0.1,-0.3]}/>
           <GalaxyCore/>
           <AsteroidBelt/>
           <Meteors/>
@@ -918,7 +915,6 @@ export default function AchievementsSection() {
             <Vignette eskil={false} offset={0.1} darkness={0.9}/>
           </EffectComposer>
         </Canvas>
-        )}
         </div>
       </div>
 
