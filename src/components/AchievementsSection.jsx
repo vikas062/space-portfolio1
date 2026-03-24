@@ -880,30 +880,26 @@ export default function AchievementsSection() {
         </div>
 
         <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0}}>
+        {canvasVisible && (
         <Canvas
           camera={{position:[0,5,55],fov:52}}
           gl={{antialias:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
           dpr={[1, 1]}
-          frameloop={canvasVisible ? 'always' : 'demand'}
+          frameloop="always"
           style={{position:'absolute',inset:0}}
         >
           <color attach="background" args={['#00000a']} />
           <fog attach="fog" args={['#01020d',55,130]}/>
-          {/* Cinematic lighting */}
           <directionalLight position={[28,18,12]} intensity={3.2} color="#fff8ee"/>
           <directionalLight position={[-22,-8,-18]} intensity={0.12} color="#3355ff"/>
           <ambientLight intensity={0.03}/>
-
           <Stars/>
-
-          {/* Rich Hubble-palette nebulae — 6 layers restored for full cinematic depth */}
           <Nebula position={[-38,14,-68]} scale={62} color="#cc2299" timeOffset={0} rotation={[0.3,-0.4,0.15]}/>
           <Nebula position={[42,-10,-75]} scale={70} color="#00bbcc" timeOffset={3} rotation={[-0.2,0.5,-0.1]}/>
           <Nebula position={[8,32,-72]} scale={58} color="#ff6600" timeOffset={7} rotation={[0.1,-0.2,0.4]}/>
           <Nebula position={[-18,-22,-60]} scale={48} color="#6622dd" timeOffset={2} rotation={[0.5,0.3,-0.2]}/>
           <Nebula position={[30,20,-80]} scale={65} color="#ff2255" timeOffset={5} rotation={[-0.1,0.2,0.3]}/>
           <Nebula position={[-48,-8,-70]} scale={55} color="#0044ff" timeOffset={9} rotation={[0.2,0.1,-0.3]}/>
-
           <GalaxyCore/>
           <AsteroidBelt/>
           <Meteors/>
@@ -911,18 +907,9 @@ export default function AchievementsSection() {
           <EarthAurora/>
           <SunFlare/>
           <SpaceDust/>
-
           {ACHIEVEMENTS.map(a=><OrbitTrail key={a.id} radius={a.orbitR} tilt={a.tilt} color={a.color}/>)}
           {ACHIEVEMENTS.map((a,i)=><Satellite key={a.id} data={a} index={i} selected={selectedId} onSelect={setSelectedId}/>)}
-
-          <OrbitControls
-            enablePan={false}
-            enableZoom={false}
-            enableDamping
-            dampingFactor={0.06}
-            rotateSpeed={0.55}
-            target={[0,0,0]}
-          />
+          <OrbitControls enablePan={false} enableZoom={false} enableDamping dampingFactor={0.06} rotateSpeed={0.55} target={[0,0,0]}/>
           <ScrollZoom scrollY={scrollY} />
           <EffectComposer>
             <Bloom intensity={0.7} luminanceThreshold={0.18} luminanceSmoothing={0.75} radius={0.8} blendFunction={BlendFunction.ADD}/>
@@ -930,6 +917,7 @@ export default function AchievementsSection() {
             <Vignette eskil={false} offset={0.1} darkness={0.9}/>
           </EffectComposer>
         </Canvas>
+        )}
         </div>
       </div>
 
