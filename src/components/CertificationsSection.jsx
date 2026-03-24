@@ -467,9 +467,10 @@ export default function CertificationsSection() {
           /*/}
           {canvasVisible && <Canvas 
             camera={{position:[0,7,18],fov:52}} 
-            gl={{antialias:false, toneMappingExposure:1.4, powerPreference:'high-performance'}}
+            gl={{antialias:false, alpha:false, toneMappingExposure:1.4, powerPreference:'high-performance'}}
             dpr={[1, 1]}
             frameloop="always"
+            onCreated={({gl}) => gl.setClearColor(0x00000a, 1)}
             style={{position:'absolute',inset:0}}
           >
             <color attach="background" args={['#00000a']} />

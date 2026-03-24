@@ -883,9 +883,10 @@ export default function AchievementsSection() {
         {canvasVisible && (
         <Canvas
           camera={{position:[0,5,55],fov:52}}
-          gl={{antialias:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
+          gl={{antialias:false, alpha:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
           dpr={[1, 1]}
           frameloop="always"
+          onCreated={({gl}) => gl.setClearColor(0x00000a, 1)}
           style={{position:'absolute',inset:0}}
         >
           <color attach="background" args={['#00000a']} />

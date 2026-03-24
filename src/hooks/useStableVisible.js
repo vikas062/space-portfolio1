@@ -10,7 +10,7 @@ import { useState, useEffect, useRef } from 'react';
  * @param {number} offDelay      - ms to wait before setting false (default 1500)
  */
 export function useStableVisible(ref, margin = '300px 0px', offDelay = 1500) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true); // start true so canvas mounts immediately
   const timer = useRef(null);
 
   useEffect(() => {
