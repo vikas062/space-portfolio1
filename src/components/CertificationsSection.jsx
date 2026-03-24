@@ -512,7 +512,7 @@ export default function CertificationsSection() {
               <CertFrame key={o.id} data={o} index={i} onSelect={setSelected} />
             ))}
 
-            <EffectComposer>
+            <EffectComposer resolutionScale={0.5}>
               <Bloom
                 intensity={0.7}
                 luminanceThreshold={0.18}

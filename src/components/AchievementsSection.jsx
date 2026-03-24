@@ -909,7 +909,7 @@ export default function AchievementsSection() {
           {ACHIEVEMENTS.map((a,i)=><Satellite key={a.id} data={a} index={i} selected={selectedId} onSelect={setSelectedId}/>)}
           <OrbitControls enablePan={false} enableZoom={false} enableDamping dampingFactor={0.06} rotateSpeed={0.55} target={[0,0,0]}/>
           <ScrollZoom scrollY={scrollY} />
-          <EffectComposer>
+          <EffectComposer resolutionScale={0.5}>
             <Bloom intensity={0.7} luminanceThreshold={0.18} luminanceSmoothing={0.75} radius={0.8} blendFunction={BlendFunction.ADD}/>
             <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0}/>
             <Vignette eskil={false} offset={0.1} darkness={0.9}/>
