@@ -307,7 +307,7 @@ export default function ProjectsSection() {
         {/* WebGL bg */}
         <Canvas camera={{ position:[0,0,18], fov:52 }} gl={{ antialias:false, powerPreference:'high-performance' }} dpr={[1,1]}
           frameloop={canvasVisible ? 'always' : 'demand'}
-          style={{ position:'absolute', inset:0, zIndex:0 }}>
+          style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:isMobile?'none':'auto' }}>
           <BgScene project={active} />
         </Canvas>
 

@@ -460,11 +460,8 @@ export default function CertificationsSection() {
             ))}
           </div>
 
-          {/*/
-            CRITICAL OPTIMIZATIONS:
-            - gl antialias={false}: EffectComposer (Bloom) works infinitely faster without multisampling.
-            - dpr={[1, 1]}: Caps pixel ratio to 1x to save fragment shader fill-rate on high-density displays (retina).
-          /*/}
+          {/* Canvas — desktop only. Mobile shows CSS space background, no WebGL */}
+          {!isMobile ? <>
           <Canvas 
             camera={{position:[0,7,18],fov:52}} 
             gl={{antialias:false, alpha:false, toneMappingExposure:1.4, powerPreference:'high-performance'}}
@@ -512,7 +509,7 @@ export default function CertificationsSection() {
               <CertFrame key={o.id} data={o} index={i} onSelect={setSelected} />
             ))}
 
-            <EffectComposer resolutionScale={0.5}>
+            <EffectComposer>
               <Bloom
                 intensity={0.7}
                 luminanceThreshold={0.18}
@@ -524,6 +521,9 @@ export default function CertificationsSection() {
               <Vignette eskil={false} offset={0.1} darkness={0.9} />
             </EffectComposer>
           </Canvas>
+          </> : <div style={{position:'absolute',inset:0,
+            background:'radial-gradient(ellipse 120% 80% at 50% 60%, #1a0840 0%, #050028 40%, #00000a 100%)',
+            pointerEvents:'none'}}/>}
 
         </div>
         {/* Bottom fade — bleeds seamlessly into AchievementsSection (same dark space) */}

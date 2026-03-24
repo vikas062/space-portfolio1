@@ -429,7 +429,7 @@ export default function SkillsSection() {
                 opacity: 0.85, mixBlendMode: 'screen',
                 filter: 'blur(40px)', pointerEvents: 'none', zIndex: 0
               }} />
-              <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+              <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: isMobile ? 'none' : 'auto' }}>
                 <Canvas 
                   camera={{ position: [0, 0, 8], fov: 50 }}
                   dpr={[1, 1]}

@@ -313,7 +313,7 @@ export default function HeroSequence() {
         gl={{antialias:false, toneMapping:THREE.ACESFilmicToneMapping, toneMappingExposure:0.82}}
         dpr={[1,1]}
         frameloop={inView ? 'always' : 'never'}
-        style={{position:'absolute',inset:0,zIndex:0}}>
+        style={{position:'absolute',inset:0,zIndex:0,pointerEvents:isMobile?'none':'auto'}}>
         <Scene posXRef={posXRef} jupiterRef={jupiterRef}/>
       </Canvas>
 

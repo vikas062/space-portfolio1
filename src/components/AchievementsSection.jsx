@@ -879,8 +879,10 @@ export default function AchievementsSection() {
           ))}
         </div>
 
-        <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0}}>
-        <Canvas
+        <div ref={canvasWrapRef} style={{position:'absolute',inset:0,zIndex:0,
+          pointerEvents: isMobile ? 'none' : 'auto',
+          background: isMobile ? 'radial-gradient(ellipse 120% 80% at 50% 40%, #1a0840 0%, #050028 40%, #00000a 100%)' : undefined}}>
+        {!isMobile && <Canvas
           camera={{position:[0,5,55],fov:52}}
           gl={{antialias:false, alpha:false, toneMappingExposure:1.4, toneMapping:THREE.ACESFilmicToneMapping, powerPreference:'high-performance'}}
           dpr={[1, 1]}
@@ -909,12 +911,12 @@ export default function AchievementsSection() {
           {ACHIEVEMENTS.map((a,i)=><Satellite key={a.id} data={a} index={i} selected={selectedId} onSelect={setSelectedId}/>)}
           <OrbitControls enablePan={false} enableZoom={false} enableDamping dampingFactor={0.06} rotateSpeed={0.55} target={[0,0,0]}/>
           <ScrollZoom scrollY={scrollY} />
-          <EffectComposer resolutionScale={0.5}>
+          <EffectComposer>
             <Bloom intensity={0.7} luminanceThreshold={0.18} luminanceSmoothing={0.75} radius={0.8} blendFunction={BlendFunction.ADD}/>
             <ChromaticAberration offset={CA_OFFSET} radialModulation={false} modulationOffset={0}/>
             <Vignette eskil={false} offset={0.1} darkness={0.9}/>
           </EffectComposer>
-        </Canvas>
+        </Canvas>}
         </div>
       </div>
 
